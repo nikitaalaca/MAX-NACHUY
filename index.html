@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Chat UI</title>
+    <title>Коллаж Сеть — Premium</title>
     <style>
         :root {
             --primary-blue: #007AFF;
             --bg-light: #F2F2F7;
-            --input-bg: #E9E9EB;
             --text-dark: #000000;
             --text-gray: #8E8E93;
             --badge-red: #FF3B30;
@@ -18,7 +17,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -32,10 +31,9 @@
             overflow: hidden;
         }
 
-        /* Главный контейнер приложения */
         .app-container {
             width: 100%;
-            max-width: 430px; /* Размер экрана современного смартфона */
+            max-width: 430px;
             height: 100vh;
             background: #FFFFFF;
             display: flex;
@@ -44,7 +42,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
         }
 
-        /* Зона чата (сообщения) */
+        /* Область чата */
         .chat-area {
             flex: 1;
             padding: 16px;
@@ -52,20 +50,10 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            padding-bottom: 160px; /* Отступ для панели ввода и дока */
+            padding-bottom: 160px;
             background-color: #F8F9FA;
         }
 
-        /* Стилизация скроллбара */
-        .chat-area::-webkit-scrollbar {
-            width: 4px;
-        }
-        .chat-area::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.1);
-            border-radius: 2px;
-        }
-
-        /* Пузыри сообщений */
         .message {
             max-width: 75%;
             padding: 12px 16px;
@@ -74,6 +62,7 @@
             line-height: 1.4;
             position: relative;
             animation: fadeIn 0.2s ease-out;
+            word-break: break-word;
         }
 
         @keyframes fadeIn {
@@ -88,29 +77,35 @@
             border-bottom-right-radius: 4px;
         }
 
-        /* Карточка-превью внутри сообщения (как на IMG_9516.png) */
+        .message.incoming {
+            background-color: #E9E9EB;
+            color: #000000;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Превью ссылки (как на IMG_9516.png) */
         .web-preview {
             background: #FFFFFF;
             border-radius: 14px;
             overflow: hidden;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             border: 1px solid rgba(0,0,0,0.05);
             color: #000;
         }
 
         .web-preview-browser {
-            padding: 8px 12px;
+            padding: 6px 12px;
             background: #F2F2F7;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 12px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 11px;
         }
 
         .web-preview-url {
-            background: rgba(0,0,0,0.05);
-            padding: 4px 8px;
+            background: rgba(0,0,0,0.06);
+            padding: 3px 8px;
             border-radius: 6px;
             flex: 1;
             text-align: center;
@@ -121,7 +116,7 @@
         }
 
         .web-preview-content {
-            height: 100px;
+            height: 80px;
             background: #FFFFFF;
             display: flex;
             align-items: center;
@@ -129,20 +124,20 @@
         }
 
         .message-time {
-            font-size: 11px;
+            font-size: 10px;
             align-self: flex-end;
             text-align: right;
-            opacity: 0.7;
+            opacity: 0.6;
             margin-top: 4px;
         }
 
-        /* Нижняя панель управления (Ввод + Док) */
+        /* Панель управления снизу */
         .bottom-controls-wrapper {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: linear-gradient(to top, rgba(255,255,255,1) 80%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(to top, rgba(255,255,255,1) 85%, rgba(255,255,255,0) 100%);
             padding-bottom: env(safe-area-inset-bottom, 16px);
             display: flex;
             flex-direction: column;
@@ -150,13 +145,12 @@
             z-index: 10;
         }
 
-        /* Панель ввода сообщения (IMG_9516.png) */
+        /* Форма ввода (IMG_9516.png) */
         .input-panel {
             display: flex;
             align-items: center;
             gap: 8px;
             padding: 0 16px;
-            background: transparent;
         }
 
         .btn-attach {
@@ -169,11 +163,6 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-attach:active {
-            background-color: #E5E5EA;
         }
 
         .input-field-container {
@@ -195,10 +184,6 @@
             color: #000000;
         }
 
-        .input-field-container input::placeholder {
-            color: #A9A9A9;
-        }
-
         .btn-send {
             width: 40px;
             height: 40px;
@@ -209,16 +194,15 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
-            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.25);
+            transition: transform 0.1s;
         }
 
         .btn-send:active {
             transform: scale(0.95);
-            background-color: #0066D6;
         }
 
-        /* Премиальный Док Бар (IMG_9514.png) */
+        /* Стильный Парящий Док (IMG_9514.png) */
         .dock-row {
             display: flex;
             align-items: center;
@@ -233,7 +217,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 32px;
-            padding: 6px 12px;
+            padding: 6px 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -247,24 +231,19 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            padding: 6px 10px;
             cursor: pointer;
-            text-decoration: none;
             min-width: 65px;
+            height: 44px;
         }
 
         .dock-icon {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             color: #2c2c2e;
-        }
-
-        .dock-item.active .dock-icon {
-            color: var(--primary-blue);
         }
 
         .dock-label {
@@ -273,27 +252,29 @@
             color: #2c2c2e;
         }
 
+        /* Активная вкладка "Чаты" */
+        .dock-item.active {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+        }
+        .dock-item.active .dock-icon {
+            color: var(--primary-blue);
+        }
         .dock-item.active .dock-label {
             color: var(--primary-blue);
         }
 
-        /* Стилизация активной вкладки Чаты (как на скриншоте) */
-        .dock-item.active-chat-tab {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 20px;
-        }
-
-        /* Красные бейджи уведомлений */
+        /* Индикаторы уведомлений */
         .badge {
             position: absolute;
-            top: 2px;
-            right: 10px;
+            top: 0px;
+            right: 8px;
             background-color: var(--badge-red);
             color: #FFFFFF;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             border-radius: 10px;
-            padding: 2px 6px;
+            padding: 2px 5px;
             min-width: 18px;
             height: 18px;
             display: flex;
@@ -302,10 +283,10 @@
             border: 1.5px solid #FFFFFF;
         }
 
-        /* Аватар профиля для настроек в едином стиле */
+        /* Круглый аватар для настроек */
         .avatar-container {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             overflow: hidden;
             background: #E5E5EA;
@@ -315,13 +296,7 @@
             border: 1px solid rgba(0,0,0,0.1);
         }
 
-        .avatar-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Отдельная кнопка поиска */
+        /* Кнопка поиска справа */
         .btn-search-dock {
             width: 52px;
             height: 52px;
@@ -333,14 +308,8 @@
             justify-content: center;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .btn-search-dock:active {
-            background-color: #F2F2F7;
-        }
-
-        /* SVG иконки для идеального вида */
         .svg-icon {
             width: 100%;
             height: 100%;
@@ -352,32 +321,27 @@
 
 <div class="app-container">
 
-    <!-- Область чата -->
     <div class="chat-area" id="chatArea">
-        <!-- Сообщение с превью (как на втором скриншоте) -->
         <div class="message outgoing">
             <div class="web-preview">
                 <div class="web-preview-browser">
-                    <svg style="width:14px; height:14px; fill:#555;" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                    <svg style="width:12px; height:12px; fill:#555;" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
                     <div class="web-preview-url">nikitaalaca.github.io</div>
-                    <svg style="width:14px; height:14px; fill:#555;" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    <svg style="width:12px; height:12px; fill:#555;" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
                 </div>
                 <div class="web-preview-content">
-                    <span style="color: #8e8e93; font-size: 13px;">Превью страницы</span>
+                    <span style="color: #8e8e93; font-size: 12px;">Превью загружено</span>
                 </div>
             </div>
-            Привет! Посмотри на этот интерфейс.
-            <div class="message-time">12:39</div>
+            Все по 100 рублей — В 12 Патио Пепси!...
+            <div class="message-time">11:46</div>
         </div>
     </div>
 
-    <!-- Общий блок управления снизу -->
     <div class="bottom-controls-wrapper">
         
-        <!-- Панель отправки (Исправлена, больше не зависает!) -->
-        <div class="input-panel">
-            <button class="btn-attach" aria-label="Прикрепить файл">
-                <!-- Качественная SVG Скрепка вместо старого эмодзи -->
+        <form class="input-panel" id="messageForm">
+            <button type="button" class="btn-attach" aria-label="Прикрепить">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
                 </svg>
@@ -385,19 +349,16 @@
             <div class="input-field-container">
                 <input type="text" id="messageInput" placeholder="Новое сообщение..." autocomplete="off">
             </div>
-            <button class="btn-send" id="sendBtn" aria-label="Отправить">
-                <!-- Белая стрелочка отправки -->
+            <button type="submit" class="btn-send" aria-label="Отправить">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
             </button>
-        </div>
+        </form>
 
-        <!-- Парящий Док в стиле iOS / VisionOS -->
         <div class="dock-row">
             <div class="main-dock">
-                <!-- Контакты -->
                 <div class="dock-item">
                     <div class="dock-icon">
                         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s1.79-4 4-4-1.79 4-4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z"/></svg>
@@ -405,7 +366,6 @@
                     <div class="dock-label">Контакты</div>
                 </div>
 
-                <!-- Звонки -->
                 <div class="dock-item">
                     <div class="dock-icon">
                         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
@@ -413,30 +373,25 @@
                     <div class="dock-label">Звонки</div>
                 </div>
 
-                <!-- Чаты (Активный элемент с круглым фоном и точным счетчиком 31) -->
-                <div class="dock-item active active-chat-tab">
+                <div class="dock-item active">
                     <div class="dock-icon">
-                        <svg class="svg-icon" style="color: #007AFF;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
                     </div>
                     <div class="dock-label">Чаты</div>
                     <div class="badge">31</div>
                 </div>
 
-                <!-- Настройки (Профиль пользователя в общем стиле + красный индикатор предупреждения) -->
                 <div class="dock-item">
                     <div class="dock-icon">
                         <div class="avatar-container">
-                            <!-- Заглушка красивого аватара -->
                             <svg viewBox="0 0 24 24" style="width:80%; height:80%; fill:#8E8E93;"><path d="M12 12c2.21 0 4-1.79 4-4s1.79-4 4-4-1.79 4-4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z"/></svg>
                         </div>
                     </div>
                     <div class="dock-label">Настройки</div>
-                    <!-- Красный круг с восклицательным знаком как на скриншоте -->
-                    <div class="badge" style="right: 12px; padding: 0; width: 16px; height: 16px; min-width: 16px;">!</div>
+                    <div class="badge" style="right: 10px; width: 16px; height: 16px; min-width:16px; padding:0;">!</div>
                 </div>
             </div>
 
-            <!-- Отдельная кнопка Поиска -->
             <button class="btn-search-dock" aria-label="Поиск">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
@@ -448,71 +403,89 @@
     </div>
 </div>
 
-<script>
-    const chatArea = document.getElementById('chatArea');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Безопасная функция прокрутки вниз
+    // Твой оригинальный конфиг из IMG_9501.png
+    const firebaseConfig = {
+        apiKey: "AIzaSyCUBd08gGbhrkGIGgsIzhTEWNMTTU_efY",
+        authDomain: "yw-83b3e.firebaseapp.com",
+        databaseURL: "https://yw-83b3e-default-rtdb.firebaseio.com",
+        projectId: "yw-83b3e",
+        storageBucket: "yw-83b3e.firebasestorage.com",
+        messagingSenderId: "513977614231",
+        appId: "1:513977614231:web:0a04427784e8259fdeced2",
+        measurementId: "G-H4YJ6NC4E9"
+    };
+
+    // Старт инстанса
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, "chat_messages"); // Ветка хранения сообщений
+
+    const chatArea = document.getElementById('chatArea');
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+
     function scrollToBottom() {
-        chatArea.scrollTo({
-            top: chatArea.scrollHeight,
-            behavior: 'smooth'
-        });
+        chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    // Логика отправки без зависаний (Фикс бага)
-    function handleSendMessage() {
-        const text = messageInput.value.trim();
-        
-        if (text === '') return; // Игнорируем пустые сообщения
+    // Рендер пузыря в DOM
+    function renderMessage(text, type, time) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.innerHTML = `
+            ${escapeHTML(text)}
+            <div class="message-time">${time}</div>
+        `;
+        chatArea.appendChild(messageDiv);
+        scrollToBottom();
+    }
 
-        // Получаем текущее время в формате ЧЧ:ММ
+    // Исправление бага с зависанием: асинхронный пуш + моментальный сброс инпута
+    messageForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        // Чистим поле ввода СРАЗУ, чтобы интерфейс не думал ни секунды
+        messageInput.value = '';
+
         const now = new Date();
         const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
 
-        // Создаем элемент сообщения
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message outgoing';
-        messageDiv.innerHTML = `
-            ${escapeHTML(text)}
-            <div class="message-time">${timeString}</div>
-        `;
+        try {
+            // Отправляем объект в Firebase Realtime DB
+            await push(messagesRef, {
+                text: text,
+                sender: "outgoing",
+                time: timeString,
+                timestamp: Date.now()
+            });
+        } catch (error) {
+            console.error("Ошибка Firebase! Проверил ли ты Rules?", error);
+            // Если база заблокирована правилами, выводим предупреждение, чтобы страница не висла
+            renderMessage("Ошибка: База данных отклонила запись. Проверь правила Rules в Firebase Console!", "incoming", timeString);
+        }
+    });
 
-        // Моментально добавляем в DOM
-        chatArea.appendChild(messageDiv);
-        
-        // Сразу очищаем инпут, предотвращая любые "зависания" UI
-        messageInput.value = '';
-        
-        // Плавный скролл к новому элементу
-        scrollToBottom();
-        
-        // Фокусируем обратно на поле ввода (для удобства)
-        messageInput.focus();
-    }
+    // Реалтайм слушатель: как только в базе появляется новая запись — она мгновенно летит на экран
+    onChildAdded(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.text) {
+            renderMessage(data.text, data.sender || "incoming", data.time || "12:00");
+        }
+    });
 
-    // Экранирование HTML для безопасности
     function escapeHTML(str) {
         return str.replace(/[&<>'"]/g, 
             tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
         );
     }
 
-    // Слушатели событий
-    sendBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        handleSendMessage();
-    });
-
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSendMessage();
-        }
-    });
-
-    // Первоначальный скролл при загрузке
     window.addEventListener('load', scrollToBottom);
 </script>
 
