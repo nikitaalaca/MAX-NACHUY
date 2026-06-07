@@ -4,25 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>Telegram Connect</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Telegram</title>
     <style>
         :root {
-            --tg-bg: #ffffff;
-            --tg-secondary-bg: #f4f4f5;
-            --tg-text: #000000;
-            --tg-subtext: #8e8e93;
-            --tg-blue: #248bfe;
-            --tg-border: #d1d1d6;
-            --tg-chat-bg: #e7ebf0;
-            --bubble-in: #ffffff;
-            --bubble-out: #248bfe;
-            --bubble-out-text: #ffffff;
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-top: env(safe-area-inset-top, 0px);
-        }
-
-        [data-theme="dark"] {
             --tg-bg: #17212b;
             --tg-secondary-bg: #0e1621;
             --tg-text: #ffffff;
@@ -33,65 +18,112 @@
             --bubble-in: #182533;
             --bubble-out: #2b5278;
             --bubble-out-text: #ffffff;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-top: env(safe-area-inset-top, 0px);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        [data-theme="light"] {
+            --tg-bg: #ffffff;
+            --tg-secondary-bg: #f4f4f5;
+            --tg-text: #000000;
+            --tg-subtext: #8e8e93;
+            --tg-blue: #248bfe;
+            --tg-border: #d1d1d6;
+            --tg-chat-bg: #e7ebf0;
+            --bubble-in: #ffffff;
+            --bubble-out: #248bfe;
+            --bubble-out-text: #ffffff;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+        }
         
         body, html { 
             width: 100%; height: 100%; 
-            background-color: var(--tg-bg); color: var(--tg-text); 
+            background-color: var(--tg-secondary-bg); color: var(--tg-text); 
             overflow: hidden; position: relative;
         }
 
-        /* ГЛАВНЫЙ ЭКРАН ПРИЛОЖЕНИЯ */
         #app-viewport {
             width: 100%; height: 100%;
             display: flex; flex-direction: column;
+            background: var(--tg-bg);
             padding-top: var(--safe-top);
             position: relative;
         }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ СТИЛЬ TELEGRAM */
+        /* ХЕДЕР В СТИЛЕ TELEGRAM (IMG_9511.png) */
         .tg-header {
-            height: 52px; padding: 0 16px;
+            height: 64px; padding: 0 16px;
             display: flex; align-items: center; justify-content: space-between;
             background: var(--tg-bg); border-bottom: 0.5px solid var(--tg-border);
             z-index: 10; flex-shrink: 0;
         }
-        .tg-header-title { font-size: 18px; font-weight: 600; }
-
-        /* ОСНОВНОЙ КОНТЕНТ */
+        .tg-header-title { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        
+        /* ОСНОВНАЯ ЗОНА КОНТЕНТА */
         .tg-content-area {
             flex: 1; overflow-y: auto; background: var(--tg-bg);
-            padding-bottom: calc(60px + var(--safe-bottom));
+            padding-bottom: calc(64px + var(--safe-bottom));
             -webkit-overflow-scrolling: touch;
         }
         .view-layer { display: none; }
         .view-layer.active { display: block; }
 
-        /* ЭЛЕМЕНТЫ СПИСКА (ЯЧЕЙКИ ХЕДЕРА/ЧАТА) */
+        /* ЯЧЕЙКИ СПИСКОВ ЧАТОВ И КОНТАКТОВ */
         .tg-cell {
-            display: flex; align-items: center; padding: 10px 16px;
+            display: flex; align-items: center; padding: 12px 16px;
             border-bottom: 0.5px solid var(--tg-border); cursor: pointer;
-            background: var(--tg-bg);
+            background: var(--tg-bg); transition: background 0.15s ease;
         }
-        .tg-cell:active { background: rgba(0,0,0,0.05); }
+        .tg-cell:active { background: rgba(255,255,255,0.06); }
+        [data-theme="light"] .tg-cell:active { background: rgba(0,0,0,0.05); }
         
         .tg-avatar {
             width: 48px; height: 48px; border-radius: 50%; color: #fff; font-weight: 600;
             display: flex; align-items: center; justify-content: center; font-size: 16px;
-            margin-right: 12px; flex-shrink: 0;
+            margin-right: 14px; flex-shrink: 0; letter-spacing: -0.2px;
         }
         .tg-cell-info { flex: 1; min-width: 0; }
-        .tg-cell-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .tg-cell-top { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: center; }
         .tg-cell-name { font-size: 16px; font-weight: 600; color: var(--tg-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .tg-cell-time { font-size: 13px; color: var(--tg-subtext); }
-        .tg-cell-msg { font-size: 14px; color: var(--tg-subtext); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tg-cell-msg { font-size: 14px; color: var(--tg-subtext); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
 
-        /* НИЖНИЙ НАВ БАР ТАБОВ (NATIVE Bottom Navigation) */
+        /* ИНФОРМАЦИОННАЯ ПЛАШКА ПУСТЫХ ЭКРАНОВ */
+        .empty-placeholder {
+            text-align: center; padding: 60px 32px; color: var(--tg-subtext); font-size: 15px; line-height: 1.5;
+        }
+
+        /* ПРОФИЛЬ И НАСТРОЙКИ (iOS Style) */
+        .profile-card {
+            display: flex; flex-direction: column; align-items: center; padding: 24px 16px;
+            background: var(--tg-bg); border-bottom: 0.5px solid var(--tg-border); margin-bottom: 20px;
+        }
+        .profile-card .tg-avatar { width: 80px; height: 80px; font-size: 26px; margin-right: 0; margin-bottom: 12px; }
+        .profile-name { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .profile-username { font-size: 14px; color: var(--tg-subtext); }
+
+        .ios-group {
+            background: var(--tg-bg); border-top: 0.5px solid var(--tg-border); border-bottom: 0.5px solid var(--tg-border);
+            margin-bottom: 20px;
+        }
+        .ios-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; border-bottom: 0.5px solid var(--tg-border); font-size: 16px;
+        }
+        .ios-row:last-child { border-bottom: none; }
+        .ios-label { font-weight: 400; }
+
+        /* НАВ БАР СНИЗУ (МАРКЕРЫ ИЗ IMG_9511.png) */
         .tg-bottom-nav {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            height: calc(54px + var(--safe-bottom));
+            height: calc(56px + var(--safe-bottom));
             padding-bottom: var(--safe-bottom);
             background: var(--tg-secondary-bg); border-top: 0.5px solid var(--tg-border);
             display: flex; justify-content: space-around; align-items: center; z-index: 50;
@@ -99,115 +131,157 @@
         .nav-tab {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background: none; border: none; color: var(--tg-subtext); cursor: pointer; width: 33.33%; height: 100%;
+            transition: color 0.15s ease;
         }
         .nav-tab.active { color: var(--tg-blue); }
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
-        .nav-label { font-size: 11px; font-weight: 500; }
+        .nav-tab svg { width: 24px; height: 24px; margin-bottom: 3px; fill: currentColor; }
+        .nav-label { font-size: 10px; font-weight: 500; }
 
-        /* ПОЛНОЭКРАННОЕ ОКНО ЧАТА НА 100% ЭКРАНА */
+        /* ЭКРАН ТЕКСТОВОГО ЧАТА (Один в один по IMG_9510.png) */
         #tg-chat-view {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
             background: var(--tg-chat-bg); z-index: 100; display: flex; flex-direction: column;
-            transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.1, 0.8, 0.25, 1);
+            transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
             padding-top: var(--safe-top);
         }
         #tg-chat-view.active { transform: translateX(0); }
 
         .chat-navbar {
-            height: 52px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
-            background: var(--tg-bg); border-bottom: 0.5px solid var(--tg-border);
+            height: 54px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--tg-bg); border-bottom: 0.5px solid var(--tg-border); flex-shrink: 0;
         }
-        .back-btn { background: none; border: none; color: var(--tg-blue); font-size: 16px; font-weight: 500; display: flex; align-items: center; cursor: pointer; }
+        .back-btn { 
+            background: none; border: none; color: var(--tg-blue); font-size: 16px; 
+            font-weight: 400; display: flex; align-items: center; cursor: pointer; gap: 4px;
+        }
+        .back-btn svg { width: 12px; height: 21px; fill: currentColor; }
         .chat-navbar-center { text-align: center; flex: 1; min-width: 0; padding: 0 8px; }
-        .chat-navbar-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chat-navbar-status { font-size: 12px; color: var(--tg-subtext); }
+        .chat-navbar-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-navbar-status { font-size: 12px; color: var(--tg-subtext); margin-top: 1px; }
 
-        .chat-history { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; -webkit-overflow-scrolling: touch; }
+        .chat-history { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
         
-        /* ОБЛАЧКА ТЕЛЕГРАМ СООБЩЕНИЙ */
+        /* СТИЛИ ОРИГИНАЛЬНЫХ СМС ОБЛАЧКОВ */
         .msg-line { display: flex; width: 100%; }
         .msg-line.out { justify-content: flex-end; }
         .msg-line.in { justify-content: flex-start; }
         
-        .msg-box { max-width: 75%; padding: 8px 12px; border-radius: 15px; font-size: 15px; line-height: 1.4; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.05); }
+        .msg-box { 
+            max-width: 75%; padding: 8px 14px; border-radius: 16px; font-size: 15px; 
+            line-height: 1.4; position: relative; box-shadow: 0 1px 1.5px rgba(0,0,0,0.15); 
+            word-wrap: break-word;
+        }
         .out .msg-box { background: var(--bubble-out); color: var(--bubble-out-text); border-bottom-right-radius: 4px; }
         .in .msg-box { background: var(--bubble-in); color: var(--tg-text); border-bottom-left-radius: 4px; }
         
-        .msg-meta { display: inline-block; font-size: 10px; margin-left: 8px; float: right; margin-top: 4px; opacity: 0.6; }
-        .out .msg-meta { color: #ffffff; }
+        .msg-meta { display: inline-block; font-size: 10px; margin-left: 10px; float: right; margin-top: 4px; opacity: 0.5; font-weight: 400; }
 
-        /* СТРОКА ВВОДА TELEGRAM STYLE */
+        /* ПАНЕЛЬ ВВОДА (IMG_9510.png) */
         .tg-input-panel {
             padding: 8px 12px calc(8px + var(--safe-bottom));
             background: var(--tg-bg); border-top: 0.5px solid var(--tg-border);
-            display: flex; align-items: center; gap: 10px;
+            display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+        }
+        .tg-input-wrapper {
+            flex: 1; position: relative; display: flex; align-items: center;
         }
         .tg-input-panel input {
-            flex: 1; padding: 9px 14px; border-radius: 20px; border: 0.5px solid var(--tg-border);
-            background: var(--tg-secondary-bg); color: var(--tg-text); font-size: 15px; outline: none;
+            width: 100%; padding: 9px 16px; border-radius: 20px; border: none;
+            background: var(--tg-secondary-bg); color: var(--tg-text); font-size: 16px; outline: none;
         }
-        .action-icon-btn { background: none; border: none; color: var(--tg-blue); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+        .tg-input-panel input::placeholder { color: var(--tg-subtext); opacity: 0.7; }
+        
+        .action-icon-btn { 
+            background: none; border: none; color: var(--tg-blue); 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            width: 36px; height: 36px; border-radius: 50%; transition: background 0.1s;
+        }
+        .action-icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        .send-btn-icon svg { width: 24px; height: 24px; }
 
-        /* ОКНО ЗВОНКА TELEGRAM VIDEO CALL */
+        /* ЭКРАН ТЕЛЕГРАМ ВИДЕОЗВОНКА */
         #call-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
-            background: #111; z-index: 500; display: none; flex-direction: column; justify-content: space-between;
+            background: #0b0e14; z-index: 500; display: none; flex-direction: column; justify-content: space-between;
+            padding: calc(30px + var(--safe-top)) 16px calc(40px + var(--safe-bottom));
         }
         #call-screen.active { display: flex; }
         .video-remote { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-        .video-local { position: absolute; top: calc(20px + var(--safe-top)); right: 16px; width: 90px; height: 135px; object-fit: cover; z-index: 5; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
+        .video-local { position: absolute; top: calc(20px + var(--safe-top)); right: 16px; width: 100px; height: 150px; object-fit: cover; z-index: 5; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.25); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         
-        .call-ui-overlay { position: absolute; bottom: calc(30px + var(--safe-bottom)); left: 0; width: 100%; z-index: 10; display: flex; justify-content: center; gap: 24px; }
-        .btn-call-circle { width: 56px; height: 56px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
-        .btn-call-circle.red { background: #fe3b30; color: #fff; }
-        .btn-call-circle.gray { background: rgba(255,255,255,0.2); color: #fff; }
+        .call-meta-top { position: relative; z-index: 10; text-align: center; color: white; margin-top: 20px; }
+        .call-meta-title { font-size: 24px; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+        .call-meta-status { font-size: 14px; opacity: 0.8; margin-top: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.6); }
 
-        /* ПОДПЛЫВАЮЩИЙ ХЕДЕР ДЛЯ ЗВОНКА */
+        .call-ui-overlay { position: relative; z-index: 10; display: flex; justify-content: center; gap: 32px; width: 100%; }
+        .btn-call-circle { width: 60px; height: 60px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
+        .btn-call-circle:active { transform: scale(0.9); }
+        .btn-call-circle svg { width: 26px; height: 26px; fill: #fff; }
+        .btn-call-circle.red { background: #ff3b30; }
+        .btn-call-circle.gray { background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+
+        /* ВСПЛЫВАЮЩИЙ ХЕДЕР ЗВОНКА (PUSH УВЕДОМЛЕНИЕ ВНУТРИ ПРИЛОЖЕНИЯ) */
         #call-alert-banner {
-            position: fixed; top: calc(10px + var(--safe-top)); left: 50%; transform: translateX(-50%) translateY(-200%);
-            width: 92%; max-width: 360px; background: rgba(28,28,30,0.96); border-radius: 16px; padding: 14px;
+            position: fixed; top: calc(12px + var(--safe-top)); left: 50%; transform: translateX(-50%) translateY(-250%);
+            width: 92%; max-width: 380px; background: rgba(28, 33, 43, 0.94); border-radius: 16px; padding: 14px 16px;
             display: flex; align-items: center; justify-content: space-between; color: white; z-index: 600;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4); transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 0.5px solid rgba(255,255,255,0.08);
         }
         #call-alert-banner.active { transform: translateX(-50%) translateY(0); }
         .banner-controls { display: flex; gap: 8px; }
-        .b-btn { border: none; padding: 8px 14px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; }
+        .b-btn { border: none; padding: 8px 16px; border-radius: 18px; font-weight: 600; font-size: 14px; cursor: pointer; }
         .b-btn.ok { background: #34c759; color: white; }
         .b-btn.no { background: #ff3b30; color: white; }
 
-        /* ВХОД */
-        .auth-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--tg-bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .auth-field { width: 100%; max-width: 320px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--tg-border); background: var(--tg-secondary-bg); color: var(--tg-text); margin-bottom: 14px; font-size: 16px; outline: none; }
-        .auth-btn { width: 100%; max-width: 320px; padding: 14px; border-radius: 10px; border: none; background: var(--tg-blue); color: white; font-size: 16px; font-weight: 600; cursor: pointer; }
+        /* ОКНО ОДНОШАГОВОЙ АВТОРИЗАЦИИ */
+        .auth-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--tg-bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; }
+        .auth-logo { width: 80px; height: 80px; background: var(--tg-blue); border-radius: 22px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; color: white; }
+        .auth-logo svg { width: 48px; height: 48px; fill: white; }
+        .auth-field { width: 100%; max-width: 320px; padding: 14px 16px; border-radius: 12px; border: 0.5px solid var(--tg-border); background: var(--tg-secondary-bg); color: var(--tg-text); margin-bottom: 12px; font-size: 16px; outline: none; }
+        .auth-btn { width: 100%; max-width: 320px; padding: 14px; border-radius: 12px; border: none; background: var(--tg-blue); color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        .auth-btn:active { opacity: 0.8; }
     </style>
 </head>
 <body>
 
     <!-- ОКНО АВТОРИЗАЦИИ -->
     <div id="auth-layer" class="auth-container">
-        <div style="font-size: 54px; margin-bottom: 10px;">💬</div>
-        <h2 style="margin-bottom: 8px; font-weight: 600;">Коллаж Сеть</h2>
-        <p style="color: var(--tg-subtext); font-size: 14px; text-align: center; margin-bottom: 24px;">Введите логин и имя для авторизации</p>
-        <input type="text" id="inp-login" class="auth-field" placeholder="Уникальный логин">
+        <div class="auth-logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.24-5.54 3.65-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.97-.74 3.79-1.65 6.32-2.74 7.59-3.27 3.61-1.5 4.36-1.76 4.85-1.77.11 0 .35.03.51.16.13.11.17.27.18.39 0 .06.01.14 0 .22z"/></svg>
+        </div>
+        <h2 style="margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px;">Войти в Telegram</h2>
+        <p style="color: var(--tg-subtext); font-size: 14px; text-align: center; margin-bottom: 24px; max-width: 260px;">Укажите ваш логин и имя для мгновенного подключения.</p>
+        <input type="text" id="inp-login" class="auth-field" placeholder="Уникальный логин (английский)">
         <input type="text" id="inp-name" class="auth-field" placeholder="Ваше имя">
-        <button class="auth-btn" onclick="handleInstantLogin()">Продолжить</button>
+        <button class="auth-btn" onclick="handleInstantLogin()">Далее</button>
     </div>
 
-    <!-- ТЕЛЕГРАМ ВИДЕОЗВОНОК SCREEN -->
+    <!-- ЭКРАН ТЕЛЕГРАМ ВИДЕОЗВОНКА -->
     <div id="call-screen">
         <video id="video-remote-track" class="video-remote" autoplay playsinline></video>
         <video id="video-local-track" class="video-local" autoplay playsinline muted></video>
+        
+        <div class="call-meta-top">
+            <div class="call-meta-title" id="node-call-user-title">Собеседник</div>
+            <div class="call-meta-status" id="node-call-status-text">Защищенное соединение...</div>
+        </div>
+
         <div class="call-ui-overlay">
-            <button class="btn-call-circle gray" onclick="toggleCameraTrack()">📷</button>
-            <button class="btn-call-circle red" onclick="terminateCallSession()">📞</button>
+            <button class="btn-call-circle gray" onclick="toggleCameraTrack()">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 16H5V8h9v8z"/></svg>
+            </button>
+            <button class="btn-call-circle red" onclick="terminateCallSession()">
+                <svg viewBox="0 0 24 24"><path d="M12 21c-4.41 0-8-3.59-8-8 0-3.95 2.87-7.24 6.64-7.93l-1.92-1.92 1.41-1.41 4.24 4.24-4.24 4.24-1.41-1.41 1.73-1.73C6.44 9.17 5 11.23 5 13c0 3.86 3.14 7 7 7s7-3.14 7-7c0-1.07-.24-2.11-.69-3.05l1.47-1.47C20.53 10.01 21 11.49 21 13c0 4.41-3.59 8-8 8z"/></svg>
+            </button>
         </div>
     </div>
 
-    <!-- ПЛАШКА ВХОДЯЩЕГО ВЫЗОВА -->
+    <!-- ВСПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ О ЗВОНКЕ -->
     <div id="call-alert-banner">
         <div>
-            <div style="font-weight:600; font-size:15px;" id="lbl-caller-name">Входящий звонок</div>
-            <div style="font-size:12px; opacity:0.6;">Telegram Video</div>
+            <div style="font-weight:700; font-size:15px;" id="lbl-caller-name">Входящий вызов</div>
+            <div style="font-size:12px; opacity:0.7; margin-top:2px;">Видеозвонок Telegram</div>
         </div>
         <div class="banner-controls">
             <button class="b-btn no" onclick="rejectIncomingCall()">Отклонить</button>
@@ -224,58 +298,80 @@
         </header>
 
         <main class="tg-content-area">
-            <!-- ЭКРАН 1: СПИСОК АКТИВНЫХ ДИАЛОГОВ -->
+            <!-- ТАБ 1: СПИСОК АКТИВНЫХ ДИАЛОГОВ -->
             <div id="layer-chats" class="view-layer active"></div>
 
-            <!-- ЭКРАН 2: СПИСОК КОНТАКТОВ -->
+            <!-- ТАБ 2: СПИСОК КОНТАКТОВ -->
             <div id="layer-contacts" class="view-layer"></div>
 
-            <!-- ЭКРАН 3: НАСТРОЙКИ -->
-            <div id="layer-settings" class="view-layer" style="padding: 16px;">
-                <div style="background: var(--tg-secondary-bg); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <span style="font-weight: 500;">Темный режим</span>
-                    <input type="checkbox" id="dark-theme-toggle" onchange="switchTheme(this.checked)" style="width:20px; height:20px;">
+            <!-- ТАБ 3: ПРОФИЛЬ / НАСТРОЙКИ (iOS) -->
+            <div id="layer-settings" class="view-layer">
+                <div class="profile-card" id="settings-profile-block">
+                    <!-- Заполняется динамически -->
                 </div>
-                <button onclick="logOutSession()" style="width:100%; padding:14px; border:none; border-radius:12px; background:#ff3b30; color:white; font-weight:600; font-size:15px;">Выйти из аккаунта</button>
+                
+                <div class="ios-group">
+                    <div class="ios-row">
+                        <span class="ios-label">Ночной режим (Темная тема)</span>
+                        <input type="checkbox" id="dark-theme-toggle" onchange="switchTheme(this.checked)" style="width:22px; height:22px; cursor:pointer;">
+                    </div>
+                    <div class="ios-row" style="cursor: pointer;" onclick="requestWebNotificationToken()">
+                        <span class="ios-label" style="color: var(--tg-blue);">Включить системные уведомления</span>
+                        <span style="font-size: 13px; color: var(--tg-subtext);">Проверить</span>
+                    </div>
+                </div>
+
+                <div class="ios-group">
+                    <div class="ios-row" style="cursor: pointer; justify-content: center;" onclick="logOutSession()">
+                        <span style="color:#ff3b30; font-weight:600;">Выйти из аккаунта</span>
+                    </div>
+                </div>
             </div>
         </main>
 
-        <!-- НАТИВНЫЙ НИЖНИЙ БАР -->
+        <!-- НАТИВНЫЙ НИЖНИЙ НАВ-БАР С SVG-ИКОНКАМИ -->
         <nav class="tg-bottom-nav">
             <button class="nav-tab" id="tab-contacts" onclick="navigateToTab('contacts')">
-                <div class="nav-icon">👥</div>
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 <div class="nav-label">Контакты</div>
             </button>
             <button class="nav-tab active" id="tab-chats" onclick="navigateToTab('chats')">
-                <div class="nav-icon">💬</div>
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
                 <div class="nav-label">Чаты</div>
             </button>
             <button class="nav-tab" id="tab-settings" onclick="navigateToTab('settings')">
-                <div class="nav-icon">⚙️</div>
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l-1.92 3.32c-.12.22-.37.29-.59.22l-2.39-.96c-.5.38-1.03.7-1.62.94l-.36 2.54c-.05.24-.24.41-.48.41h-3.84c-.24 0-.43-.17-.47-.41l-.36-2.54c-.59-.24-1.13-.56-1.62-.94l-2.39.96c-.22.08-.47 0-.59-.22l-1.92-3.32c-.12-.22-.07-.47.12-.61l2.03-1.58zM12 15.6c1.98 0 3.6-1.62 3.6-3.6s-1.62-3.6-3.6-3.6-3.6 1.62-3.6 3.6 1.62 3.6 3.6 3.6z"/></svg>
                 <div class="nav-label">Настройки</div>
             </button>
         </nav>
     </div>
 
-    <!-- ПОЛНОЭКРАННЫЙ СЛАЙД-ЧАТ iMESSAGE/TELEGRAM -->
+    <!-- ПОЛНОЭКРАННЫЙ СЛАЙД-ЧАТ (Оригинал из IMG_9510.png) -->
     <div id="tg-chat-view">
         <header class="chat-navbar">
             <button class="back-btn" onclick="leaveChatRoomView()">
-                <span style="font-size:24px; margin-right:2px; line-height:1;">‹</span> Назад
+                <svg viewBox="0 0 12 21"><path d="M10.5 1.5L1.5 10.5L10.5 19.5" stroke="#5288c1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+                Назад
             </button>
             <div class="chat-navbar-center">
                 <div class="chat-navbar-name" id="node-chat-partner-name">...</div>
                 <div class="chat-navbar-status" id="node-chat-partner-status">в сети</div>
             </div>
-            <!-- КНОПКА ВИДЕОЗВОНКА -->
-            <button class="action-icon-btn" onclick="startVideoCallPipeline()" title="Видеозвонок">📹</button>
+            <!-- КНОПКА ВИДЕОЗВОНКА ИЗ ИКОНКИ КАМЕРЫ (IMG_9510.png) -->
+            <button class="action-icon-btn" onclick="startVideoCallPipeline()">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            </button>
         </header>
         
         <div class="chat-history" id="chat-scroller-node"></div>
         
         <footer class="tg-input-panel">
-            <input type="text" id="chat-text-input" placeholder="Сообщение" onkeypress="if(event.key==='Enter') transmitMessagePacket()">
-            <button class="action-icon-btn" onclick="transmitMessagePacket()">➔</button>
+            <div class="tg-input-wrapper">
+                <input type="text" id="chat-text-input" placeholder="Сообщение" onkeypress="if(event.key==='Enter') transmitMessagePacket()">
+            </div>
+            <button class="action-icon-btn send-btn-icon" onclick="transmitMessagePacket()">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
         </footer>
     </div>
 
@@ -301,6 +397,7 @@
         let allUsers = [];
         let currentActiveTab = 'chats';
         let currentChatPartnerId = null;
+        let isInitialLoad = true;
 
         // WebRTC Signaling State
         let localStream = null;
@@ -309,20 +406,36 @@
         const iceServersConfig = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] };
 
         window.addEventListener('DOMContentLoaded', () => {
-            const mode = localStorage.getItem('tg_dark') === 'true';
-            switchTheme(mode);
-            document.getElementById('dark-theme-toggle').checked = mode;
+            // Выставляем темную тему по дефолту (как на скриншотах)
+            const storedTheme = localStorage.getItem('tg_dark');
+            const isDark = storedTheme !== null ? storedTheme === 'true' : true;
+            switchTheme(isDark);
+            document.getElementById('dark-theme-toggle').checked = isDark;
 
             database.ref('users').on('value', (snap) => {
                 allUsers = Object.values(snap.val() || {});
                 renderDynamicInterface();
                 listenIncomingCalls();
+                listenGlobalIncomingMessages();
             });
 
             if (currentUserId) {
                 document.getElementById('auth-layer').style.display = 'none';
+                requestWebNotificationToken();
             }
         });
+
+        function requestWebNotificationToken() {
+            if ("Notification" in window) {
+                Notification.requestPermission();
+            }
+        }
+
+        function triggerWebPush(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body: body, icon: "💬" });
+            }
+        }
 
         function handleInstantLogin() {
             const login = document.getElementById('inp-login').value.trim().toLowerCase();
@@ -334,7 +447,7 @@
                 currentUserId = userMatch.id;
             } else {
                 currentUserId = "id_" + Date.now();
-                const colors = ["#248bfe", "#34c759", "#ff9500", "#ff2d55", "#af52de"];
+                const colors = ["#5288c1", "#34c759", "#ff9500", "#ff2d55", "#af52de"];
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 database.ref('users/' + currentUserId).set({
                     id: currentUserId, login, name, color, role: "Пользователь сети"
@@ -342,6 +455,7 @@
             }
             localStorage.setItem('tg_uid', currentUserId);
             document.getElementById('auth-layer').style.display = 'none';
+            requestWebNotificationToken();
             renderDynamicInterface();
         }
 
@@ -367,7 +481,14 @@
             if (!currentUserId) return;
             const me = allUsers.find(u => u.id === currentUserId);
             if (me) {
-                document.getElementById('tg-self-avatar').innerHTML = `<div class="tg-avatar" style="background:${me.color}; width:32px; height:32px; font-size:12px; margin:0;">${me.name.substring(0,2).toUpperCase()}</div>`;
+                document.getElementById('tg-self-avatar').innerHTML = `<div class="tg-avatar" style="background:${me.color}; width:34px; height:34px; font-size:13px; margin:0;">${me.name.substring(0,2).toUpperCase()}</div>`;
+                
+                // Заполняем настройки профиля
+                document.getElementById('settings-profile-block').innerHTML = `
+                    <div class="tg-avatar" style="background:${me.color}">${me.name.substring(0,2).toUpperCase()}</div>
+                    <div class="profile-name">${me.name}</div>
+                    <div class="profile-username">@${me.login}</div>
+                `;
             }
             if (currentActiveTab === 'contacts') drawContactsView();
             if (currentActiveTab === 'chats') drawChatsView();
@@ -376,7 +497,14 @@
         function drawContactsView() {
             const root = document.getElementById('layer-contacts');
             root.innerHTML = '';
-            allUsers.filter(u => u.id !== currentUserId).forEach(u => {
+            const filtered = allUsers.filter(u => u.id !== currentUserId);
+            
+            if(filtered.length === 0) {
+                root.innerHTML = `<div class="empty-placeholder">Нет доступных контактов в сети.</div>`;
+                return;
+            }
+
+            filtered.forEach(u => {
                 const cell = document.createElement('div');
                 cell.className = 'tg-cell';
                 cell.onclick = () => initChatRoomOverlay(u.id);
@@ -424,8 +552,12 @@
                 });
 
                 if (count === 0) {
-                    root.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--tg-subtext); font-size:14px;">Список чатов пуст.<br>Откройте вкладку "Контакты" для начала общения.</div>`;
+                    root.innerHTML = `
+                        <div class="empty-placeholder">
+                            Список чатов пуст.<br>Откройте вкладку "Контакты" для начала общения.
+                        </div>`;
                 }
+                isInitialLoad = false;
             });
         }
 
@@ -484,9 +616,32 @@
             database.ref('messages/' + roomKey).push({
                 senderId: currentUserId,
                 text: text,
-                time: time
+                time: time,
+                timestamp: Date.now()
             });
             input.value = '';
+        }
+
+        function listenGlobalIncomingMessages() {
+            if (!currentUserId) return;
+            // Слушаем появление новых сообщений для генерации Push-уведомлений
+            database.ref('messages').on('child_changed', (snap) => {
+                if (isInitialLoad) return;
+                const roomKey = snap.key;
+                if (!roomKey.includes(currentUserId)) return;
+
+                const messages = Object.values(snap.val() || {});
+                const lastMsg = messages[messages.length - 1];
+
+                if (lastMsg && lastMsg.senderId !== currentUserId) {
+                    // Если чат с ним прямо сейчас не открыт
+                    if (currentChatPartnerId !== lastMsg.senderId) {
+                        const sender = allUsers.find(u => u.id === lastMsg.senderId);
+                        const senderName = sender ? sender.name : "Новое сообщение";
+                        triggerWebPush(senderName, lastMsg.text);
+                    }
+                }
+            });
         }
 
         function switchTheme(isDark) {
@@ -495,7 +650,7 @@
         }
 
         // =========================================================================
-        // 📞 СИГНАЛЬНОЕ ЯДРО ВЕБ-ЗВОНКОВ (WebRTC Engine)
+        // СИГНАЛЬНОЕ ЯДРО ВЕБ-ЗВОНКОВ (WebRTC Engine)
         // =========================================================================
 
         function listenIncomingCalls() {
@@ -508,8 +663,11 @@
                         activeCallRef = database.ref('facetime/' + key);
                         const caller = allUsers.find(u => u.id === session.callerId);
                         
-                        document.getElementById('lbl-caller-name').innerText = caller ? caller.name : "Вызов";
+                        const nameString = caller ? caller.name : "Вызов";
+                        document.getElementById('lbl-caller-name').innerText = nameString;
                         document.getElementById('call-alert-banner').classList.add('active');
+                        
+                        triggerWebPush("Входящий звонок", `Вызывает ${nameString}`);
 
                         activeCallRef.on('value', (innerSnap) => {
                             if (!innerSnap.exists() || innerSnap.val().status === 'ended') {
@@ -527,6 +685,9 @@
             const callId = [currentUserId, currentChatPartnerId].sort().join('__');
             activeCallRef = database.ref('facetime/' + callId);
 
+            const target = allUsers.find(u => u.id === currentChatPartnerId);
+            document.getElementById('node-call-user-title').innerText = target ? target.name : "Соединение";
+            document.getElementById('node-call-status-text').innerText = "Звонок...";
             document.getElementById('call-screen').classList.add('active');
 
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -537,6 +698,7 @@
 
             peerConnection.ontrack = (e) => {
                 document.getElementById('video-remote-track').srcObject = e.streams[0];
+                document.getElementById('node-call-status-text').innerText = "00:01";
             };
 
             peerConnection.onicecandidate = (e) => {
@@ -558,6 +720,7 @@
                 const ans = snap.val();
                 if (ans && peerConnection.signalingState !== "stable") {
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(ans));
+                    document.getElementById('node-call-status-text').innerText = "Соединение установлено";
                 }
             });
 
@@ -569,9 +732,13 @@
         async function acceptIncomingCall() {
             document.getElementById('call-alert-banner').classList.remove('active');
             document.getElementById('call-screen').classList.add('active');
+            document.getElementById('node-call-status-text').innerText = "Подключение...";
 
             const snap = await activeCallRef.get();
             const sessionData = snap.val();
+
+            const target = allUsers.find(u => u.id === sessionData.callerId);
+            document.getElementById('node-call-user-title').innerText = target ? target.name : "Разговор";
 
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             document.getElementById('video-local-track').srcObject = localStream;
@@ -581,6 +748,7 @@
 
             peerConnection.ontrack = (e) => {
                 document.getElementById('video-remote-track').srcObject = e.streams[0];
+                document.getElementById('node-call-status-text').innerText = "00:01";
             };
 
             peerConnection.onicecandidate = (e) => {
