@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Коллаж Связь — Корпоративный Мессенджер</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(160deg, #efecf4 0%, #e3e7f1 50%, #e8ebf5 100%);
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+            --text-main: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --accent: #0071e3;
+            --bubble-in: rgba(255, 255, 255, 0.75);
+            --bubble-out: #0071e3;
+            --bubble-out-text: #ffffff;
+            --radius-card: 24px;
+            --radius-bubble: 20px;
+            --blur: 35px;
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(160deg, #08080a 0%, #121215 50%, #1a1a22 100%);
+            --glass-bg: rgba(24, 24, 28, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            --text-main: #f5f5f7;
+            --text-secondary: #86868b;
+            --accent: #2997ff;
+            --bubble-in: rgba(255, 255, 255, 0.08);
+            --bubble-out: #2997ff;
+            --bubble-out-text: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            letter-spacing: -0.015em;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            position: relative;
+        }
+
+        /* Живой Liquid-фон для генерации глубины стекла */
+        .liquid-bg {
+            position: absolute;
+            top: -10%; left: -10%; width: 120%; height: 120%;
+            z-index: 1;
+            filter: blur(90px);
+            opacity: 0.65;
+            pointer-events: none;
+        }
+        .liquid-blob {
+            position: absolute;
+            border-radius: 55%;
+            mix-blend-mode: multiply;
+            animation: floatBubble 20s infinite alternate ease-in-out;
+        }
+        [data-theme="dark"] .liquid-blob { mix-blend-mode: plus-lighter; opacity: 0.15; }
+        .blob-1 { top: 15%; left: 15%; width: 450px; height: 450px; background: #0071e3; opacity: 0.2; }
+        .blob-2 { bottom: 15%; right: 15%; width: 500px; height: 500px; background: #bf5af2; opacity: 0.2; animation-delay: -4s; }
+        .blob-3 { top: 40%; left: 50%; width: 350px; height: 350px; background: #ff2d55; opacity: 0.15; animation-delay: -8s; }
+
+        @keyframes floatBubble {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(60px, 40px) scale(1.05) rotate(180deg); }
+            100% { transform: translate(-30px, 80px) scale(0.95) rotate(360deg); }
+        }
+
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur)) saturate(210%);
+            -webkit-backdrop-filter: blur(var(--blur)) saturate(210%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        #app-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Системные экраны */
+        .view-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            z-index: 20;
+            background: var(--bg-gradient);
+        }
+        .view-layer.active { display: flex; }
+
+        .tab-screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 50px 16px calc(85px + env(safe-area-inset-bottom));
+            overflow-y: auto;
+        }
+        .tab-screen.active { display: flex; }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            padding-left: 4px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur)) saturate(210%);
+            -webkit-backdrop-filter: blur(var(--blur)) saturate(210%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: var(--radius-card);
+            padding: 6px;
+            margin-bottom: 16px;
+        }
+
+        /* Поисковые бары */
+        .search-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(142, 142, 147, 0.12);
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+        }
+        .search-wrapper input {
+            border: none; background: transparent; outline: none;
+            width: 100%; font-size: 16px; color: var(--text-main);
+            margin-left: 8px;
+        }
+
+        /* Элементы списков */
+        .list-cell {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: background 0.25s, transform 0.15s;
+        }
+        .list-cell:not(:last-child) { border-bottom: 0.5px solid var(--glass-border); }
+        .list-cell:active { background: rgba(142, 142, 147, 0.15); transform: scale(0.98); }
+
+        .avatar {
+            width: 48px; height: 48px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; color: #fff; font-size: 16px;
+            margin-right: 12px; position: relative;
+        }
+        .online-status {
+            width: 13px; height: 13px; border-radius: 50%;
+            background: #34c759; position: absolute; bottom: -1px; right: -1px;
+            border: 2.5px solid var(--glass-bg);
+        }
+        .online-status.offline { background: #8e8e93; }
+
+        .cell-data { flex: 1; min-width: 0; }
+        .cell-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+        .cell-title { font-weight: 600; font-size: 16px; }
+        .cell-time { font-size: 13px; color: var(--text-secondary); }
+        .cell-sub { font-size: 14px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .counter-badge {
+            background: var(--accent); color: #fff; font-size: 12px;
+            font-weight: 600; padding: 2px 7px; border-radius: 10px;
+            min-width: 18px; text-align: center;
+        }
+
+        /* Навигация нижней панели */
+        .tab-navigator {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: calc(64px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 90; border-top: 0.5px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
+        }
+        .tab-trigger {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; color: var(--text-secondary);
+            font-size: 10px; font-weight: 500; cursor: pointer;
+            width: 33%; height: 100%; transition: color 0.2s;
+        }
+        .tab-trigger.active { color: var(--accent); }
+        .tab-trigger svg { width: 23px; height: 23px; margin-bottom: 3px; }
+
+        /* Окно чата (Экран переписки) */
+        #chat-window {
+            position: fixed;
+            top: 0; right: 0; width: 100%; height: 100%;
+            background: var(--bg-gradient); z-index: 150;
+            display: flex; flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #chat-window.active { transform: translateX(0); }
+
+        .chat-navbar {
+            padding: 45px 16px 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 0.5px solid var(--glass-border);
+            border-radius: 0 0 20px 24px;
+        }
+        .nav-profile-block { display: flex; align-items: center; }
+        .back-action {
+            display: flex; align-items: center; color: var(--accent);
+            cursor: pointer; font-size: 16px; font-weight: 500; margin-right: 6px;
+        }
+
+        .local-search-pane {
+            display: none; padding: 8px 16px;
+            background: rgba(142, 142, 147, 0.06);
+            border-bottom: 0.5px solid var(--glass-border);
+        }
+        .local-search-pane.open { display: block; }
+        .local-search-pane input {
+            width: 100%; padding: 8px 12px; border-radius: 10px;
+            border: none; background: var(--glass-bg); color: var(--text-main); outline: none;
+        }
+
+        .chat-scroller {
+            flex: 1; padding: 16px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+
+        .msg-bubble {
+            max-width: 72%; padding: 10px 14px; font-size: 15px;
+            line-height: 1.45; position: relative;
+            animation: bubbleFly 0.25s cubic-bezier(0.15, 0.85, 0.35, 1);
+        }
+        @keyframes bubbleFly {
+            from { transform: scale(0.85) translateY(12px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .msg-bubble.incoming {
+            align-self: flex-start; background: var(--bubble-in); color: var(--text-main);
+            border-radius: var(--radius-bubble) var(--radius-bubble) var(--radius-bubble) 4px;
+            box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border);
+        }
+        .msg-bubble.outgoing {
+            align-self: flex-end; background: var(--bubble-out); color: var(--bubble-out-text);
+            border-radius: var(--radius-bubble) var(--radius-bubble) 4px var(--radius-bubble);
+        }
+        .msg-time-stamp { font-size: 10px; opacity: 0.65; margin-top: 4px; text-align: right; }
+        .mark-match { background: rgba(255, 214, 0, 0.35); border-radius: 2px; color: inherit; }
+
+        .typing-space { padding: 2px 16px 8px; font-size: 12px; color: var(--text-secondary); font-style: italic; min-height: 22px; }
+
+        .footer-input-bar {
+            padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+            display: flex; align-items: center; gap: 10px;
+            border-top: 0.5px solid var(--glass-border);
+            border-radius: 20px 20px 0 0;
+        }
+        .footer-input-bar input {
+            flex: 1; padding: 11px 16px; border-radius: 20px;
+            border: 1px solid var(--glass-border); background: rgba(142,142,147,0.06);
+            color: var(--text-main); font-size: 15px; outline: none;
+        }
+
+        /* Настройки */
+        .settings-option {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 12px; cursor: pointer;
+        }
+        .settings-option:not(:last-child) { border-bottom: 0.5px solid var(--glass-border); }
+        .settings-option span { font-size: 16px; font-weight: 500; }
+        .checked-label { color: var(--accent); font-weight: 700; }
+
+        /* Аутентификация / Вход / Регистрация */
+        .auth-gate {
+            display: flex; align-items: center; justify-content: center; padding: 24px;
+        }
+        .auth-box {
+            width: 100%; max-width: 360px; padding: 28px 20px; border-radius: 28px;
+        }
+        .auth-box h2 { font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+        .auth-box p { text-align: center; font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; padding-left: 4px;}
+        .input-group input {
+            width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border);
+            background: rgba(142,142,147,0.06); color: var(--text-main); font-size: 15px; outline: none;
+        }
+        .auth-toggle-link { text-align: center; font-size: 13px; color: var(--accent); margin-top: 16px; cursor: pointer; font-weight: 500; }
+
+        /* Кнопки */
+        .action-button {
+            background: var(--accent); color: white; border: none; padding: 14px;
+            border-radius: 14px; font-size: 16px; font-weight: 600; width: 100%;
+            cursor: pointer; transition: transform 0.1s; margin-top: 10px;
+        }
+        .action-button:active { transform: scale(0.98); }
+
+        /* Онбординг */
+        .onboarding-wrap { display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .onboard-slide { display: none; text-align: center; animation: flowIn 0.3s ease; }
+        .onboard-slide.active { display: block; }
+        @keyframes flowIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .slide-graphic { font-size: 56px; margin-bottom: 16px; display: inline-block; }
+        .onboard-slide h2 { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        .onboard-slide p { font-size: 15px; color: var(--text-secondary); line-height: 1.45; }
+
+    </style>
+</head>
+<body>
+
+    <div class="liquid-bg">
+        <div class="liquid-blob blob-1"></div>
+        <div class="liquid-blob blob-2"></div>
+        <div class="liquid-blob blob-3"></div>
+    </div>
+
+    <div id="app-container">
+
+        <div id="layer-onboarding" class="view-layer onboarding-wrap">
+            <div class="auth-box liquid-glass">
+                <div class="onboard-slide active" data-step="1">
+                    <span class="slide-graphic">👋</span>
+                    <h2>Коллаж Связь</h2>
+                    <p>Добро пожаловать во внутреннюю коммуникационную среду компании «Коллаж».</p>
+                    <button class="action-button" onclick="moveOnboard(1)">Продолжить</button>
+                </div>
+                <div class="onboard-slide" data-step="2">
+                    <span class="slide-graphic">⚡️</span>
+                    <h2>Общайтесь быстро</h2>
+                    <p>Мгновенный обмен сообщениями и оперативное решение корпоративных задач.</p>
+                    <button class="action-button" onclick="moveOnboard(2)">Далее</button>
+                </div>
+                <div class="onboard-slide" data-step="3">
+                    <span class="slide-graphic">🔮</span>
+                    <h2>Простой интерфейс</h2>
+                    <p>Премиальный минималистичный дизайн Liquid Glass, созданный специально для вас.</p>
+                    <button class="action-button" onclick="moveOnboard(3)">Всё понятно</button>
+                </div>
+                <div class="onboard-slide" data-step="4">
+                    <span class="slide-graphic">🚀</span>
+                    <h2>Начать работу</h2>
+                    <p>Пройдите авторизацию или зарегистрируйте локальный профиль сотрудника.</p>
+                    <button class="action-button" onclick="endOnboarding()">Запустить</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="layer-auth" class="view-layer auth-gate">
+            <div class="auth-box liquid-glass" id="auth-card-context">
+                </div>
+        </div>
+
+        <div id="layer-workspace" class="view-layer">
+            
+            <div id="screen-chats" class="tab-screen active">
+                <h1>Чаты</h1>
+                <div class="search-wrapper liquid-glass">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" placeholder="Поиск по чатам..." oninput="searchChatsHandler(this.value)">
+                </div>
+                <div class="glass-card" id="chats-render-root"></div>
+            </div>
+
+            <div id="screen-contacts" class="tab-screen">
+                <h1>Контакты</h1>
+                <div class="search-wrapper liquid-glass">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" placeholder="Поиск сотрудников..." oninput="searchContactsHandler(this.value)">
+                </div>
+                <div class="glass-card" id="contacts-render-root"></div>
+            </div>
+
+            <div id="screen-settings" class="tab-screen">
+                <h1>Настройки</h1>
+                
+                <div class="glass-card" style="padding: 12px 14px; display:flex; align-items:center; margin-bottom:16px;">
+                    <div id="user-profile-avatar" class="avatar" style="margin-right:12px; width:44px; height:44px;"></div>
+                    <div>
+                        <div id="user-profile-name" style="font-weight:600; font-size:16px;">Пользователь</div>
+                        <div id="user-profile-role" style="font-size:13px; color:var(--text-secondary);">Сотрудник</div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="settings-option" onclick="switchAppTheme('light')">
+                        <span>Светлая тема</span>
+                        <span class="checked-label" id="theme-lbl-light"></span>
+                    </div>
+                    <div class="settings-option" onclick="switchAppTheme('dark')">
+                        <span>Тёмная тема</span>
+                        <span class="checked-label" id="theme-lbl-dark"></span>
+                    </div>
+                    <div class="settings-option" onclick="switchAppTheme('system')">
+                        <span>Системная тема</span>
+                        <span class="checked-label" id="theme-lbl-system"></span>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="settings-option" style="color: #ff3b30;" onclick="clearGlobalHistory()">
+                        <span>Очистить историю сообщений</span>
+                    </div>
+                    <div class="settings-option" style="color: #ff3b30;" onclick="systemHardReset()">
+                        <span>Сбросить все данные приложения</span>
+                    </div>
+                    <div class="settings-option" onclick="logOutSession()">
+                        <span style="color: var(--accent);">Выйти из аккаунта</span>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding: 16px;">
+                    <h4 style="margin-bottom: 4px; font-weight: 600;">Коллаж Связь</h4>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Версия 1.0.4 (Liquid Database Engine)</p>
+                    <p style="font-size: 14px; line-height: 1.4;">Корпоративная внутренняя среда компании Коллаж. Все данные шифруются локально на вашем устройстве.</p>
+                </div>
+            </div>
+
+            <nav class="tab-navigator liquid-glass">
+                <div class="tab-trigger active" id="trigger-chats" onclick="selectTab('chats')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-11.7 8.38 8.38 0 0 1 3.8.9L21 3z"></path></svg>
+                    <span>Чаты</span>
+                </div>
+                <div class="tab-trigger" id="trigger-contacts" onclick="selectTab('contacts')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Контакты</span>
+                </div>
+                <div class="tab-trigger" id="trigger-settings" onclick="selectTab('settings')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Настройки</span>
+                </div>
+            </nav>
+        </div>
+
+        <div id="chat-window">
+            <div class="chat-navbar liquid-glass">
+                <div class="nav-profile-block">
+                    <div class="back-action" onclick="closeActiveChat()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        <span>Назад</span>
+                    </div>
+                    <div class="avatar" id="cw-avatar" style="width:36px; height:36px; font-size:13px; margin-right:10px;"></div>
+                    <div>
+                        <div class="cell-title" id="cw-title" style="font-size:15px;">Сотрудник</div>
+                        <div style="font-size:11px; color:#34c759;" id="cw-status">онлайн</div>
+                    </div>
+                </div>
+                <div style="color: var(--accent); cursor: pointer; padding: 6px;" onclick="toggleInternalSearch()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+            </div>
+
+            <div class="local-search-pane" id="cw-search-wrapper">
+                <input type="text" placeholder="Поиск слова по текущему диалогу..." oninput="executeInternalSearch(this.value)">
+            </div>
+
+            <div class="chat-scroller" id="cw-flow"></div>
+            <div class="typing-space" id="cw-typing-ghost"></div>
+
+            <div class="footer-input-bar liquid-glass">
+                <input type="text" id="cw-input" placeholder="Сообщение" onkeypress="if(event.key==='Enter') dispatchMessage()">
+                <div onclick="dispatchMessage()" style="color: var(--accent); cursor: pointer; display: flex; align-items: center;">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Предустановленные системные сотрудники компании (боты)
+        const baseCorporateDirectory = [
+            { id: "corp_1", name: "Иван Петров", role: "Менеджер", color: "#ff9500", isBot: true, online: true },
+            { id: "corp_2", name: "Анна Смирнова", role: "Администратор", color: "#ff2d55", isBot: true, online: true },
+            { id: "corp_3", name: "Дмитрий Волков", role: "Специалист", color: "#5856d6", isBot: true, online: false },
+            { id: "corp_4", name: "Мария Иванова", role: "Координатор", color: "#af52de", isBot: true, online: true },
+            { id: "corp_5", name: "Алексей Соколов", role: "Руководитель отдела", color: "#34c759", isBot: true, online: false },
+            { id: "corp_6", name: "Екатерина Морозова", role: "HR-менеджер", color: "#ff3b30", isBot: true, online: true },
+            { id: "corp_7", name: "Сергей Орлов", role: "Аналитик", color: "#0071e3", isBot: true, online: true },
+            { id: "corp_8", name: "Ольга Кузнецова", role: "Бухгалтер", color: "#5ac8fa", isBot: true, online: false }
+        ];
+
+        const botPhrases = ["Хорошо.", "Принято.", "Спасибо.", "Отлично.", "Уже занимаюсь.", "Согласен.", "Уточню информацию.", "Выполню.", "Проверю.", "На связи."];
+        const randomHexColors = ["#0071e3", "#ff2d55", "#34c759", "#ff9500", "#af52de", "#5ac8fa", "#5856d6"];
+
+        // Клиентская СУБД структура
+        let db = {
+            users: JSON.parse(localStorage.getItem('db_users')) || [], 
+            sessions: localStorage.getItem('db_active_session') || null, 
+            messages: JSON.parse(localStorage.getItem('db_messages')) || {}, 
+            onboardState: localStorage.getItem('db_onboard_complete') === 'true',
+            themeState: localStorage.getItem('db_theme') || 'system'
+        };
+
+        let runtimeState = {
+            activeTab: 'chats',
+            activeChatTargetId: null,
+            isRegisterMode: false
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initSystemFlow();
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if(db.themeState === 'system') syncThemeUI();
+            });
+        });
+
+        function initSystemFlow() {
+            syncThemeUI();
+            if (!db.onboardState) {
+                switchViewLayer('layer-onboarding');
+            } else if (!db.sessions) {
+                switchViewLayer('layer-auth');
+                drawAuthForm();
+            } else {
+                switchViewLayer('layer-workspace');
+                buildUserContextProfile();
+                selectTab('chats');
+            }
+        }
+
+        function switchViewLayer(layerId) {
+            document.querySelectorAll('.view-layer').forEach(l => l.classList.remove('active'));
+            document.getElementById(layerId).classList.add('active');
+        }
+
+        // Онбординг логика
+        function moveOnboard(currentStep) {
+            document.querySelector(`.onboard-slide[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.onboard-slide[data-step="${currentStep + 1}"]`).classList.add('active');
+        }
+
+        function endOnboarding() {
+            localStorage.setItem('db_onboard_complete', 'true');
+            db.onboardState = true;
+            switchViewLayer('layer-auth');
+            drawAuthForm();
+        }
+
+        // Реляционная Симуляция Авторизации и Регистрации
+        function drawAuthForm() {
+            const root = document.getElementById('auth-card-context');
+            if (!runtimeState.isRegisterMode) {
+                root.innerHTML = `
+                    <h2>Вход</h2>
+                    <p>Корпоративная сеть компании Коллаж</p>
+                    <div class="input-group">
+                        <label>Логин / Email</label>
+                        <input type="text" id="auth-login" placeholder="username" autocomplete="off">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label>Пароль</label>
+                        <input type="password" id="auth-pass" placeholder="••••••••">
+                    </div>
+                    <button class="action-button" onclick="handleLoginAction()">Войти в систему</button>
+                    <div class="auth-toggle-link" onclick="toggleAuthMode(true)">Создать локальный профиль сотрудника</div>
+                `;
+            } else {
+                root.innerHTML = `
+                    <h2>Регистрация</h2>
+                    <p>Создание учетной записи сотрудника</p>
+                    <div class="input-group">
+                        <label>Логин (Уникальный)</label>
+                        <input type="text" id="reg-login" placeholder="ivanov_i" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>Имя и Фамилия</label>
+                        <input type="text" id="reg-name" placeholder="Иван Иванов" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label>Должность / Департамент</label>
+                        <input type="text" id="reg-role" placeholder="Инженер" autocomplete="off">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label>Пароль</label>
+                        <input type="password" id="reg-pass" placeholder="Пароль">
+                    </div>
+                    <button class="action-button" onclick="handleRegisterAction()">Зарегистрироваться</button>
+                    <div class="auth-toggle-link" onclick="toggleAuthMode(false)">Уже есть аккаунт? Войти</div>
+                `;
+            }
+        }
+
+        function toggleAuthMode(mode) {
+            runtimeState.isRegisterMode = mode;
+            drawAuthForm();
+        }
+
+        function handleRegisterAction() {
+            const login = document.getElementById('reg-login').value.trim();
+            const name = document.getElementById('reg-name').value.trim();
+            const role = document.getElementById('reg-role').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+
+            if(!login || !name || !role || !pass) { alert('Пожалуйста, заполните все поля карточки регистрации.'); return; }
+            
+            const userExists = db.users.some(u => u.login.toLowerCase() === login.toLowerCase());
+            if (userExists) { alert('Данный логин уже занят другим сотрудником компании.'); return; }
+
+            const newUserId = "user_" + Date.now();
+            const color = randomHexColors[Math.floor(Math.random() * randomHexColors.length)];
+            
+            const newUserObj = { id: newUserId, login, name, role, pass, color, isBot: false, online: true };
+            db.users.push(newUserObj);
+            localStorage.setItem('db_users', JSON.stringify(db.users));
+
+            db.sessions = newUserId;
+            localStorage.setItem('db_active_session', newUserId);
+
+            initSystemFlow();
+        }
+
+        function handleLoginAction() {
+            const login = document.getElementById('auth-login').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+
+            const matchedUser = db.users.find(u => u.login.toLowerCase() === login.toLowerCase() && u.pass === pass);
+            
+            if (!matchedUser) {
+                alert('Неверное сочетание логина и пароля или аккаунт не существует.');
+                return;
+            }
+
+            db.sessions = matchedUser.id;
+            localStorage.setItem('db_active_session', matchedUser.id);
+            initSystemFlow();
+        }
+
+        function logOutSession() {
+            db.sessions = null;
+            localStorage.removeItem('db_active_session');
+            initSystemFlow();
+        }
+
+        // Профилирование
+        function getCurrentUserObject() {
+            return db.users.find(u => u.id === db.sessions);
+        }
+
+        function buildUserContextProfile() {
+            const me = getCurrentUserObject();
+            if(!me) return;
+            document.getElementById('user-profile-name').innerText = me.name;
+            document.getElementById('user-profile-role').innerText = me.role;
+            const av = document.getElementById('user-profile-avatar');
+            av.innerText = generateInitials(me.name);
+            av.style.background = me.color;
+        }
+
+        function generateInitials(fullName) {
+            let p = fullName.split(' ');
+            return (p[0][0] + (p[1] ? p[1][0] : '')).toUpperCase();
+        }
+
+        // Вкладки и маршрутизация внутри Workspace
+        function selectTab(tabId) {
+            document.querySelectorAll('.tab-screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-trigger').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById('screen-' + tabId).classList.add('active');
+            document.getElementById('trigger-' + tabId).classList.add('active');
+            runtimeState.activeTab = tabId;
+
+            if (tabId === 'chats') renderChatsTab();
+            if (tabId === 'contacts') renderContactsTab();
+        }
+
+        // Универсальный генератор комбинированного ключа диалога для базы данных (Связка ID_ID упорядоченная)
+        function getDatabaseChatKey(idTarget) {
+            const currentUserId = db.sessions;
+            return [currentUserId, idTarget].sort().join('__');
+        }
+
+        // Получение полного списка доступных людей (Предустановленные + зарегистрированные пользователи, за исключением себя)
+        function getGlobalDirectory() {
+            const me = db.sessions;
+            const filteredRegistered = db.users.filter(u => u.id !== me);
+            return [...baseCorporateDirectory, ...filteredRegistered];
+        }
+
+        // Сборка и рендеринг контактов
+        function renderContactsTab(searchQuery = '') {
+            const container = document.getElementById('contacts-render-root');
+            container.innerHTML = '';
+            
+            const directory = getGlobalDirectory();
+            const filtered = directory.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.role.toLowerCase().includes(searchQuery.toLowerCase()));
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-secondary); font-size:14px;">Сотрудники не найдены</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const cell = document.createElement('div');
+                cell.className = 'list-cell';
+                cell.onclick = () => openChatWindowWith(p.id);
+                cell.innerHTML = `
+                    <div class="avatar" style="background: ${p.color}">
+                        ${generateInitials(p.name)}
+                        <div class="online-status ${p.online ? '' : 'offline'}"></div>
+                    </div>
+                    <div class="cell-data">
+                        <div class="cell-head"><span class="cell-title">${p.name}</span></div>
+                        <div class="cell-sub">${p.role}</div>
+                    </div>
+                `;
+                container.appendChild(cell);
+            });
+        }
+
+        // Сборка и рендеринг активных чатов текущего пользователя
+        function renderChatsTab(searchQuery = '') {
+            const container = document.getElementById('chats-render-root');
+            container.innerHTML = '';
+            
+            const directory = getGlobalDirectory();
+            let injectedCount = 0;
+
+            directory.forEach(p => {
+                const chatKey = getDatabaseChatKey(p.id);
+                const history = db.messages[chatKey] || [];
+                
+                if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) return;
+                if (history.length === 0 && !searchQuery) return; // Показываем чаты только если есть история или идет поиск
+
+                const lastMessageObj = history.length > 0 ? history[history.length - 1] : null;
+                const messageSnippet = lastMessageObj ? lastMessageObj.text : 'Нет сообщений';
+                const timeSnippet = lastMessageObj ? lastMessageObj.time : '';
+
+                injectedCount++;
+
+                const cell = document.createElement('div');
+                cell.className = 'list-cell';
+                cell.onclick = () => openChatWindowWith(p.id);
+                cell.innerHTML = `
+                    <div class="avatar" style="background: ${p.color}">
+                        ${generateInitials(p.name)}
+                    </div>
+                    <div class="cell-data">
+                        <div class="cell-head">
+                            <span class="cell-title">${p.name}</span>
+                            <span class="cell-time">${timeSnippet}</span>
+                        </div>
+                        <div class="cell-head">
+                            <span class="cell-sub" style="max-width: 82%;">${messageSnippet}</span>
+                            ${history.length > 0 ? `<span class="counter-badge">1</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(cell);
+            });
+
+            if(injectedCount === 0) {
+                container.innerHTML = `<div style="padding:32px 20px; text-align:center; color:var(--text-secondary); font-size:14px;">Здесь будут отображаться ваши диалоги. Перейдите в Контакты, чтобы начать общение.</div>`;
+            }
+        }
+
+        // Логика Окна Переписки
+        function openChatWindowWith(targetId) {
+            const directory = getGlobalDirectory();
+            const person = directory.find(p => p.id === targetId);
+            if(!person) return;
+
+            runtimeState.activeChatTargetId = targetId;
+
+            document.getElementById('cw-title').innerText = person.name;
+            const av = document.getElementById('cw-avatar');
+            av.innerText = generateInitials(person.name);
+            av.style.background = person.color;
+
+            const statusNode = document.getElementById('cw-status');
+            statusNode.innerText = person.online ? 'онлайн' : 'офлайн';
+            statusNode.style.color = person.online ? '#34c759' : 'var(--text-secondary)';
+
+            document.getElementById('cw-search-wrapper').classList.remove('open');
+            document.getElementById('chat-window').classList.add('active');
+
+            drawChatMessagesFlow();
+        }
+
+        function closeActiveChat() {
+            document.getElementById('chat-window').classList.remove('active');
+            runtimeState.activeChatTargetId = null;
+            if(runtimeState.activeTab === 'chats') renderChatsTab();
+        }
+
+        function drawChatMessagesFlow(highlightWord = '') {
+            const flow = document.getElementById('cw-flow');
+            flow.innerHTML = '';
+
+            const chatKey = getDatabaseChatKey(runtimeState.activeChatTargetId);
+            const history = db.messages[chatKey] || [];
+
+            history.forEach(m => {
+                let textRepresentation = m.text;
+                
+                if (highlightWord && textRepresentation.toLowerCase().includes(highlightWord.toLowerCase())) {
+                    const matchRegex = new RegExp(`(${highlightWord})`, 'gi');
+                    textRepresentation = textRepresentation.replace(matchRegex, `<span class="mark-match">$1</span>`);
+                }
+
+                const node = document.createElement('div');
+                node.className = `msg-bubble ${m.direction === 'out' ? 'outgoing' : 'incoming'}`;
+                node.innerHTML = `
+                    <div>${textRepresentation}</div>
+                    <div class="msg-time-stamp">${m.time}</div>
+                `;
+                flow.appendChild(node);
+            });
+
+            flow.scrollTop = flow.scrollHeight;
+        }
+
+        // Отправка сообщений и алгоритм автоответчика корпоративных ботов
+        function dispatchMessage() {
+            const input = document.getElementById('cw-input');
+            const rawText = input.value.trim();
+            if(!rawText) return;
+
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const chatKey = getDatabaseChatKey(runtimeState.activeChatTargetId);
+
+            if(!db.messages[chatKey]) db.messages[chatKey] = [];
+            
+            // Сохраняем исходящее
+            db.messages[chatKey].push({ direction: 'out', text: rawText, time: time });
+            localStorage.setItem('db_messages', JSON.stringify(db.messages));
+            
+            input.value = '';
+            drawChatMessagesFlow();
+
+            const currentChatSessionContext = runtimeState.activeChatTargetId;
+            const directory = getGlobalDirectory();
+            const targetPerson = directory.find(p => p.id === currentChatSessionContext);
+
+            // Если собеседник — бот и онлайн, запускаем процесс имитации ответа
+            if(targetPerson && targetPerson.isBot && targetPerson.online) {
+                const delayToType = 1000 + Math.random() * 1500;
+                
+                setTimeout(() => {
+                    if (runtimeState.activeChatTargetId !== currentChatSessionContext) return;
+                    document.getElementById('cw-typing-ghost').innerText = `${targetPerson.name} печатает...`;
+                    
+                    setTimeout(() => {
+                        if (runtimeState.activeChatTargetId !== currentChatSessionContext) return;
+                        document.getElementById('cw-typing-ghost').innerText = '';
+
+                        const botText = botPhrases[Math.floor(Math.random() * botPhrases.length)];
+                        const botTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                        db.messages[chatKey].push({ direction: 'in', text: botText, time: botTime });
+                        localStorage.setItem('db_messages', JSON.stringify(db.messages));
+                        
+                        drawChatMessagesFlow();
+                    }, 1400);
+
+                }, delayToType);
+            }
+        }
+
+        // Поиск по сообщениям внутри диалога
+        function toggleInternalSearch() {
+            document.getElementById('cw-search-wrapper').classList.toggle('open');
+        }
+
+        function executeInternalSearch(val) {
+            drawChatMessagesFlow(val);
+        }
+
+        // Поиск на главных вкладках
+        function searchChatsHandler(val) { renderChatsTab(val); }
+        function searchContactsHandler(val) { renderContactsTab(val); }
+
+        // Управление темами оформления
+        function switchAppTheme(themeMode) {
+            db.themeState = themeMode;
+            localStorage.setItem('db_theme', themeMode);
+            syncThemeUI();
+        }
+
+        function syncThemeUI() {
+            let actualValue = db.themeState;
+            if (db.themeState === 'system') {
+                actualValue = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', actualValue);
+
+            document.getElementById('theme-lbl-light').innerText = db.themeState === 'light' ? '✓' : '';
+            document.getElementById('theme-lbl-dark').innerText = db.themeState === 'dark' ? '✓' : '';
+            document.getElementById('theme-lbl-system').innerText = db.themeState === 'system' ? '✓' : '';
+        }
+
+        // Очистка данных базы
+        function clearGlobalHistory() {
+            if (confirm('Вы уверены, что хотите полностью стереть историю переписки вашего аккаунта?')) {
+                db.messages = {};
+                localStorage.setItem('db_messages', JSON.stringify({}));
+                if (runtimeState.activeChatTargetId) drawChatMessagesFlow();
+                renderChatsTab();
+            }
+        }
+
+        function systemHardReset() {
+            if (confirm('Внимание! Это действие безвозвратно удалит все зарегистрированные профили, настройки и диалоги на этом устройстве.')) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
