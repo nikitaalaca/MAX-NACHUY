@@ -4,299 +4,282 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Collage Liquid Connect</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Telegram Connect</title>
     <style>
         :root {
-            --ios-blur: blur(30px) saturate(190%);
-            --glass-bg: rgba(255, 255, 255, 0.55);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --text-main: #000000;
-            --text-sub: #6c6c70;
-            --apple-blue: #007af5;
-            --apple-gradient: linear-gradient(135deg, #007af5 0%, #2f9fff 100%);
-            --bubble-out: #007af5;
-            --bubble-in: rgba(255, 255, 255, 0.7);
-            --mesh-bg: radial-gradient(at 0% 0%, #e2e9ff 0px, transparent 50%),
-                       radial-gradient(at 50% 0%, #ffeaf1 0px, transparent 50%),
-                       radial-gradient(at 100% 100%, #eafcff 0px, transparent 50%);
+            --tg-bg: #ffffff;
+            --tg-secondary-bg: #f4f4f5;
+            --tg-text: #000000;
+            --tg-subtext: #8e8e93;
+            --tg-blue: #248bfe;
+            --tg-border: #d1d1d6;
+            --tg-chat-bg: #e7ebf0;
+            --bubble-in: #ffffff;
+            --bubble-out: #248bfe;
+            --bubble-out-text: #ffffff;
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --safe-top: env(safe-area-inset-top, 0px);
         }
 
         [data-theme="dark"] {
-            --glass-bg: rgba(20, 20, 25, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #ffffff;
-            --text-sub: #98989d;
-            --apple-blue: #2997ff;
-            --bubble-in: rgba(30, 30, 35, 0.75);
-            --mesh-bg: radial-gradient(at 0% 0%, #1a103c 0px, transparent 50%),
-                       radial-gradient(at 100% 0%, #0d1b2a 0px, transparent 50%),
-                       radial-gradient(at 50% 100%, #160f29 0px, transparent 50%);
+            --tg-bg: #17212b;
+            --tg-secondary-bg: #0e1621;
+            --tg-text: #ffffff;
+            --tg-subtext: #7f8c99;
+            --tg-blue: #5288c1;
+            --tg-border: #101921;
+            --tg-chat-bg: #0e1621;
+            --bubble-in: #182533;
+            --bubble-out: #2b5278;
+            --bubble-out-text: #ffffff;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         
         body, html { 
             width: 100%; height: 100%; 
-            background: var(--mesh-bg); background-color: #000;
-            color: var(--text-main); overflow: hidden; 
-            position: relative; user-select: none; -webkit-user-select: none;
+            background-color: var(--tg-bg); color: var(--tg-text); 
+            overflow: hidden; position: relative;
         }
 
-        /* ГЛАВНЫЙ МОБИЛЬНЫЙ КОНТЕЙНЕР (ЭКРАН ТЕЛЕФОНА) */
-        #stage {
+        /* ГЛАВНЫЙ ЭКРАН ПРИЛОЖЕНИЯ */
+        #app-viewport {
             width: 100%; height: 100%;
-            position: relative; display: flex; flex-direction: column;
+            display: flex; flex-direction: column;
             padding-top: var(--safe-top);
+            position: relative;
         }
 
-        /* ЖИДКАЯ ШАПКА В СТИЛЕ APPLE */
-        .ios-navbar {
-            padding: 16px 20px 12px;
+        /* ВЕРХНЯЯ ПАНЕЛЬ СТИЛЬ TELEGRAM */
+        .tg-header {
+            height: 52px; padding: 0 16px;
             display: flex; align-items: center; justify-content: space-between;
-            background: var(--glass-bg); backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur);
-            border-bottom: 1px solid var(--glass-border); z-index: 100;
+            background: var(--tg-bg); border-bottom: 0.5px solid var(--tg-border);
+            z-index: 10; flex-shrink: 0;
         }
-        .ios-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .tg-header-title { font-size: 18px; font-weight: 600; }
 
-        /* СКРОЛЛ-ЗОНА КОНТЕНТА ВКЛАДОК */
-        .ios-viewport {
-            flex: 1; overflow-y: auto; padding: 12px 16px calc(85px + var(--safe-bottom));
+        /* ОСНОВНОЙ КОНТЕНТ */
+        .tg-content-area {
+            flex: 1; overflow-y: auto; background: var(--tg-bg);
+            padding-bottom: calc(60px + var(--safe-bottom));
             -webkit-overflow-scrolling: touch;
         }
-        .tab-view { display: none; animation: iosFade 0.25s ease; }
-        .tab-view.active { display: block; }
-        @keyframes iosFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .view-layer { display: none; }
+        .view-layer.active { display: block; }
 
-        /* ЭЛЕМЕНТЫ СПИСКА (ЧАТЫ И КОНТАКТЫ) */
-        .ios-cell {
-            display: flex; align-items: center; padding: 14px;
-            background: var(--glass-bg); backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur);
-            border: 1px solid var(--glass-border); border-radius: 16px; margin-bottom: 10px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.02); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        /* ЭЛЕМЕНТЫ СПИСКА (ЯЧЕЙКИ ХЕДЕРА/ЧАТА) */
+        .tg-cell {
+            display: flex; align-items: center; padding: 10px 16px;
+            border-bottom: 0.5px solid var(--tg-border); cursor: pointer;
+            background: var(--tg-bg);
         }
-        .ios-cell:active { transform: scale(0.97); background: rgba(142,142,147,0.1); }
+        .tg-cell:active { background: rgba(0,0,0,0.05); }
         
-        .ios-avatar {
-            width: 46px; height: 46px; border-radius: 50%; color: #fff; font-weight: 700;
+        .tg-avatar {
+            width: 48px; height: 48px; border-radius: 50%; color: #fff; font-weight: 600;
             display: flex; align-items: center; justify-content: center; font-size: 16px;
-            margin-right: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-shrink: 0;
+            margin-right: 12px; flex-shrink: 0;
         }
-        .cell-body { flex: 1; min-width: 0; }
-        .cell-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-        .cell-name { font-weight: 600; font-size: 16px; color: var(--text-main); }
-        .cell-time { font-size: 12px; color: var(--text-sub); }
-        .cell-text { font-size: 14px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tg-cell-info { flex: 1; min-width: 0; }
+        .tg-cell-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .tg-cell-name { font-size: 16px; font-weight: 600; color: var(--tg-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tg-cell-time { font-size: 13px; color: var(--tg-subtext); }
+        .tg-cell-msg { font-size: 14px; color: var(--tg-subtext); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        /* 👑 LIQUID BOTTOM DOCK (НИЖНИЙ БАР iOS 26) */
-        .ios-dock-container {
+        /* НИЖНИЙ НАВ БАР ТАБОВ (NATIVE Bottom Navigation) */
+        .tg-bottom-nav {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            padding: 10px 24px calc(10px + var(--safe-bottom));
-            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex; justify-content: space-around; align-items: center; z-index: 200;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
+            height: calc(54px + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom);
+            background: var(--tg-secondary-bg); border-top: 0.5px solid var(--tg-border);
+            display: flex; justify-content: space-around; align-items: center; z-index: 50;
         }
-        .dock-item {
+        .nav-tab {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: transparent; border: none; color: var(--text-sub); cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); position: relative; width: 60px; height: 48px;
+            background: none; border: none; color: var(--tg-subtext); cursor: pointer; width: 33.33%; height: 100%;
         }
-        .dock-icon { font-size: 22px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .dock-label { font-size: 10px; font-weight: 600; margin-top: 3px; }
-        
-        /* Активное ликвидное состояние иконки */
-        .dock-item.active { color: var(--apple-blue); }
-        .dock-item.active .dock-icon { transform: translateY(-4px) scale(1.15); }
+        .nav-tab.active { color: var(--tg-blue); }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        .nav-label { font-size: 11px; font-weight: 500; }
 
-        /* ПОЛНОЭКРАННОЕ ОКНО ЧАТА (Сдвиг как в iOS приложениях) */
-        #ios-chat-overlay {
+        /* ПОЛНОЭКРАННОЕ ОКНО ЧАТА НА 100% ЭКРАНА */
+        #tg-chat-view {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
-            background: var(--mesh-bg); background-color: #000; z-index: 300;
-            display: flex; flex-direction: column;
-            transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.32, 0.94, 0.6, 1);
+            background: var(--tg-chat-bg); z-index: 100; display: flex; flex-direction: column;
+            transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.1, 0.8, 0.25, 1);
             padding-top: var(--safe-top);
         }
-        #ios-chat-overlay.active { transform: translateX(0); }
+        #tg-chat-view.active { transform: translateX(0); }
 
-        .chat-header {
-            padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
-            background: var(--glass-bg); backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur);
-            border-bottom: 1px solid var(--glass-border);
+        .chat-navbar {
+            height: 52px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--tg-bg); border-bottom: 0.5px solid var(--tg-border);
         }
-        .back-btn { background: transparent; border: none; color: var(--apple-blue); font-size: 16px; font-weight: 500; display: flex; align-items: center; cursor: pointer; }
-        
-        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
-        
-        /* ПУЗЫРИ СООБЩЕНИЙ iMESSAGE STYLE */
-        .bubble-wrapper { display: flex; flex-direction: column; max-width: 75%; position: relative; }
-        .bubble-wrapper.out { align-self: flex-end; }
-        .bubble-wrapper.in { align-self: flex-start; }
-        
-        .bubble-content { padding: 10px 16px; border-radius: 20px; font-size: 15px; line-height: 1.4; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-        .out .bubble-content { background: var(--apple-gradient); color: white; border-bottom-right-radius: 4px; }
-        .in .bubble-content { background: var(--bubble-in); color: var(--text-main); backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur); border: 1px solid var(--glass-border); border-bottom-left-radius: 4px; }
-        .bubble-time { font-size: 10px; color: var(--text-sub); margin-top: 3px; align-self: flex-end; opacity: 0.7; }
-        .out .bubble-time { color: rgba(255,255,255,0.8); }
+        .back-btn { background: none; border: none; color: var(--tg-blue); font-size: 16px; font-weight: 500; display: flex; align-items: center; cursor: pointer; }
+        .chat-navbar-center { text-align: center; flex: 1; min-width: 0; padding: 0 8px; }
+        .chat-navbar-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-navbar-status { font-size: 12px; color: var(--tg-subtext); }
 
-        /* ИНПУТ БАР ДЛЯ ОТПРАВКИ СООБЩЕНИЙ */
-        .ios-input-bar {
-            padding: 10px 14px calc(10px + var(--safe-bottom));
-            background: var(--glass-bg); backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur);
-            border-top: 1px solid var(--glass-border); display: flex; align-items: center; gap: 10px;
-        }
-        .ios-input-bar input {
-            flex: 1; padding: 10px 16px; border-radius: 22px; border: 1px solid var(--glass-border);
-            background: rgba(142,142,147,0.12); color: var(--text-main); font-size: 15px; outline: none;
-        }
-        .send-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--apple-gradient); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+        .chat-history { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; -webkit-overflow-scrolling: touch; }
+        
+        /* ОБЛАЧКА ТЕЛЕГРАМ СООБЩЕНИЙ */
+        .msg-line { display: flex; width: 100%; }
+        .msg-line.out { justify-content: flex-end; }
+        .msg-line.in { justify-content: flex-start; }
+        
+        .msg-box { max-width: 75%; padding: 8px 12px; border-radius: 15px; font-size: 15px; line-height: 1.4; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.05); }
+        .out .msg-box { background: var(--bubble-out); color: var(--bubble-out-text); border-bottom-right-radius: 4px; }
+        .in .msg-box { background: var(--bubble-in); color: var(--tg-text); border-bottom-left-radius: 4px; }
+        
+        .msg-meta { display: inline-block; font-size: 10px; margin-left: 8px; float: right; margin-top: 4px; opacity: 0.6; }
+        .out .msg-meta { color: #ffffff; }
 
-        /* 📞 МОДУЛЬ ЗВОНКОВ FACETIME GLASS */
-        #facetime-layer {
+        /* СТРОКА ВВОДА TELEGRAM STYLE */
+        .tg-input-panel {
+            padding: 8px 12px calc(8px + var(--safe-bottom));
+            background: var(--tg-bg); border-top: 0.5px solid var(--tg-border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .tg-input-panel input {
+            flex: 1; padding: 9px 14px; border-radius: 20px; border: 0.5px solid var(--tg-border);
+            background: var(--tg-secondary-bg); color: var(--tg-text); font-size: 15px; outline: none;
+        }
+        .action-icon-btn { background: none; border: none; color: var(--tg-blue); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+
+        /* ОКНО ЗВОНКА TELEGRAM VIDEO CALL */
+        #call-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
-            background: #000; z-index: 500; display: none; flex-direction: column; justify-content: space-between;
+            background: #111; z-index: 500; display: none; flex-direction: column; justify-content: space-between;
         }
-        #facetime-layer.active { display: flex; }
-        .stream-remote { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-        .stream-local { position: absolute; top: calc(20px + var(--safe-top)); right: 20px; width: 105px; height: 155px; object-fit: cover; z-index: 5; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.3); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        #call-screen.active { display: flex; }
+        .video-remote { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        .video-local { position: absolute; top: calc(20px + var(--safe-top)); right: 16px; width: 90px; height: 135px; object-fit: cover; z-index: 5; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
         
-        .facetime-actions {
-            position: absolute; bottom: calc(40px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
-            z-index: 10; display: flex; gap: 20px; background: rgba(255,255,255,0.15); padding: 14px 28px;
-            border-radius: 40px; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.2);
-        }
-        .ft-btn { width: 54px; height: 54px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: transform 0.1s ease; }
-        .ft-btn:active { transform: scale(0.9); }
-        .ft-btn.hangup { background: #ff3b30; color: white; }
-        .ft-btn.cam { background: rgba(255,255,255,0.25); color: white; }
+        .call-ui-overlay { position: absolute; bottom: calc(30px + var(--safe-bottom)); left: 0; width: 100%; z-index: 10; display: flex; justify-content: center; gap: 24px; }
+        .btn-call-circle { width: 56px; height: 56px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+        .btn-call-circle.red { background: #fe3b30; color: #fff; }
+        .btn-call-circle.gray { background: rgba(255,255,255,0.2); color: #fff; }
 
-        /* УВЕДОМЛЕНИЕ О ВХОДЯЩЕМ ВЫЗОВЕ */
-        #ft-banner {
-            position: fixed; top: calc(12px + var(--safe-top)); left: 50%; transform: translateX(-50%) translateY(-200%);
-            width: 92%; max-width: 380px; background: rgba(30, 30, 35, 0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 16px;
+        /* ПОДПЛЫВАЮЩИЙ ХЕДЕР ДЛЯ ЗВОНКА */
+        #call-alert-banner {
+            position: fixed; top: calc(10px + var(--safe-top)); left: 50%; transform: translateX(-50%) translateY(-200%);
+            width: 92%; max-width: 360px; background: rgba(28,28,30,0.96); border-radius: 16px; padding: 14px;
             display: flex; align-items: center; justify-content: space-between; color: white; z-index: 600;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
         }
-        #ft-banner.active { transform: translateX(-50%) translateY(0); }
-        .ft-banner-btns { display: flex; gap: 8px; }
-        .banner-btn { border: none; padding: 10px 18px; border-radius: 16px; font-weight: 600; font-size: 13px; cursor: pointer; }
-        .banner-btn.yes { background: #34c759; color: white; }
-        .banner-btn.no { background: #ff3b30; color: white; }
+        #call-alert-banner.active { transform: translateX(-50%) translateY(0); }
+        .banner-controls { display: flex; gap: 8px; }
+        .b-btn { border: none; padding: 8px 14px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; }
+        .b-btn.ok { background: #34c759; color: white; }
+        .b-btn.no { background: #ff3b30; color: white; }
 
-        /* Окна настроек и утилит */
-        .settings-card { background: var(--glass-bg); backdrop-filter: var(--ios-blur); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--glass-border); }
-        .settings-row:last-child { border-bottom: none; }
-        .ios-select { padding: 6px 12px; border-radius: 10px; background: rgba(142,142,147,0.15); color: var(--text-main); border: none; outline: none; font-weight: 600; }
-        
-        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
-        .auth-box { width: 88%; max-width: 360px; padding: 24px; background: rgba(255,255,255,0.9); border-radius: 24px; backdrop-filter: blur(20px); text-align: center; color: #000; }
-        .ios-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); margin-bottom: 12px; font-size: 15px; outline: none; background: #fff; }
+        /* ВХОД */
+        .auth-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--tg-bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        .auth-field { width: 100%; max-width: 320px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--tg-border); background: var(--tg-secondary-bg); color: var(--tg-text); margin-bottom: 14px; font-size: 16px; outline: none; }
+        .auth-btn { width: 100%; max-width: 320px; padding: 14px; border-radius: 10px; border: none; background: var(--tg-blue); color: white; font-size: 16px; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="auth-layer" class="auth-overlay">
-        <div class="auth-box">
-            <h2 style="margin-bottom:6px; font-weight:700; letter-spacing:-0.5px;">Коллаж Сеть</h2>
-            <p style="font-size:13px; color:#666; margin-bottom:20px;">Введите ваш рабочий логин</p>
-            <input type="text" id="auth-username" class="ios-input" placeholder="Уникальный логин">
-            <input type="text" id="auth-displayname" class="ios-input" placeholder="Ваше Имя и Фамилия">
-            <button onclick="performInstantAuth()" style="width:100%; padding:14px; border:none; border-radius:14px; background:linear-gradient(135deg, #007af5 0%, #0056b3 100%); color:white; font-weight:600; font-size:16px;">Войти в систему</button>
+    <!-- ОКНО АВТОРИЗАЦИИ -->
+    <div id="auth-layer" class="auth-container">
+        <div style="font-size: 54px; margin-bottom: 10px;">💬</div>
+        <h2 style="margin-bottom: 8px; font-weight: 600;">Коллаж Сеть</h2>
+        <p style="color: var(--tg-subtext); font-size: 14px; text-align: center; margin-bottom: 24px;">Введите логин и имя для авторизации</p>
+        <input type="text" id="inp-login" class="auth-field" placeholder="Уникальный логин">
+        <input type="text" id="inp-name" class="auth-field" placeholder="Ваше имя">
+        <button class="auth-btn" onclick="handleInstantLogin()">Продолжить</button>
+    </div>
+
+    <!-- ТЕЛЕГРАМ ВИДЕОЗВОНОК SCREEN -->
+    <div id="call-screen">
+        <video id="video-remote-track" class="video-remote" autoplay playsinline></video>
+        <video id="video-local-track" class="video-local" autoplay playsinline muted></video>
+        <div class="call-ui-overlay">
+            <button class="btn-call-circle gray" onclick="toggleCameraTrack()">📷</button>
+            <button class="btn-call-circle red" onclick="terminateCallSession()">📞</button>
         </div>
     </div>
 
-    <div id="facetime-layer">
-        <video id="remote-video" class="stream-remote" autoplay playsinline></video>
-        <video id="local-video" class="stream-local" autoplay playsinline muted></video>
-        <div class="facetime-actions">
-            <button class="ft-btn cam" onclick="muteFacetimeCamera()">📷</button>
-            <button class="ft-btn hangup" onclick="hangupFacetimeCall()">📞</button>
-        </div>
-    </div>
-
-    <div id="ft-banner">
+    <!-- ПЛАШКА ВХОДЯЩЕГО ВЫЗОВА -->
+    <div id="call-alert-banner">
         <div>
-            <div style="font-weight:700; font-size:16px;" id="ft-caller-name">Вызов...</div>
-            <div style="font-size:12px; opacity:0.7;">FaceTime видеозвонок</div>
+            <div style="font-weight:600; font-size:15px;" id="lbl-caller-name">Входящий звонок</div>
+            <div style="font-size:12px; opacity:0.6;">Telegram Video</div>
         </div>
-        <div class="ft-banner-btns">
-            <button class="banner-btn no" onclick="declineFacetimeCall()">Отклонить</button>
-            <button class="banner-btn yes" onclick="acceptFacetimeCall()">Ответить</button>
+        <div class="banner-controls">
+            <button class="b-btn no" onclick="rejectIncomingCall()">Отклонить</button>
+            <button class="b-btn ok" onclick="acceptIncomingCall()">Ответить</button>
         </div>
     </div>
 
-    <div id="stage">
+    <!-- ОСНОВНАЯ ОБОЛОЧКА ПРИЛОЖЕНИЯ -->
+    <div id="app-viewport">
         
-        <header class="ios-navbar">
-            <span class="ios-title" id="ios-page-title">Чаты</span>
-            <div id="my-badge-container"></div>
+        <header class="tg-header">
+            <span class="tg-header-title" id="tg-title-node">Чаты</span>
+            <div id="tg-self-avatar"></div>
         </header>
 
-        <main class="ios-viewport">
-            
-            <div id="view-chats" class="tab-view active"></div>
+        <main class="tg-content-area">
+            <!-- ЭКРАН 1: СПИСОК АКТИВНЫХ ДИАЛОГОВ -->
+            <div id="layer-chats" class="view-layer active"></div>
 
-            <div id="view-contacts" class="tab-view"></div>
+            <!-- ЭКРАН 2: СПИСОК КОНТАКТОВ -->
+            <div id="layer-contacts" class="view-layer"></div>
 
-            <div id="view-settings" class="tab-view">
-                <div class="settings-card">
-                    <h3 style="margin-bottom:12px; font-size:15px; text-transform:uppercase; color:var(--text-sub)">Внешний вид</h3>
-                    <div class="settings-row">
-                        <label style="font-weight:500;">Тема оформления</label>
-                        <select id="theme-selector" class="ios-select" onchange="toggleThemeMode(this.value)">
-                            <option value="light">Светлое стекло</option>
-                            <option value="dark">Ночной Mesh</option>
-                        </select>
-                    </div>
+            <!-- ЭКРАН 3: НАСТРОЙКИ -->
+            <div id="layer-settings" class="view-layer" style="padding: 16px;">
+                <div style="background: var(--tg-secondary-bg); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <span style="font-weight: 500;">Темный режим</span>
+                    <input type="checkbox" id="dark-theme-toggle" onchange="switchTheme(this.checked)" style="width:20px; height:20px;">
                 </div>
-                <div class="settings-card" style="text-align:center;">
-                    <button onclick="clearSessionLogOut()" style="background:transparent; border:none; color:#ff3b30; font-weight:600; font-size:16px; cursor:pointer; width:100%;">Выйти из аккаунта</button>
-                </div>
+                <button onclick="logOutSession()" style="width:100%; padding:14px; border:none; border-radius:12px; background:#ff3b30; color:white; font-weight:600; font-size:15px;">Выйти из аккаунта</button>
             </div>
-
         </main>
 
-        <nav class="ios-dock-container">
-            <button class="dock-item active" id="dock-chats" onclick="switchIosTab('chats')">
-                <div class="dock-icon">💬</div>
-                <div class="dock-label">Чаты</div>
+        <!-- НАТИВНЫЙ НИЖНИЙ БАР -->
+        <nav class="tg-bottom-nav">
+            <button class="nav-tab" id="tab-contacts" onclick="navigateToTab('contacts')">
+                <div class="nav-icon">👥</div>
+                <div class="nav-label">Контакты</div>
             </button>
-            <button class="dock-item" id="dock-contacts" onclick="switchIosTab('contacts')">
-                <div class="dock-icon">👥</div>
-                <div class="dock-label">Контакты</div>
+            <button class="nav-tab active" id="tab-chats" onclick="navigateToTab('chats')">
+                <div class="nav-icon">💬</div>
+                <div class="nav-label">Чаты</div>
             </button>
-            <button class="dock-item" id="dock-settings" onclick="switchIosTab('settings')">
-                <div class="dock-icon">⚙️</div>
-                <div class="dock-label">Настройки</div>
+            <button class="nav-tab" id="tab-settings" onclick="navigateToTab('settings')">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">Настройки</div>
             </button>
         </nav>
-
     </div>
 
-    <div id="ios-chat-overlay">
-        <header class="chat-header">
-            <button class="back-btn" onclick="closeIosChatOverlay()">
-                <span style="font-size:22px; margin-right:4px; line-height:1;">‹</span> Назад
+    <!-- ПОЛНОЭКРАННЫЙ СЛАЙД-ЧАТ iMESSAGE/TELEGRAM -->
+    <div id="tg-chat-view">
+        <header class="chat-navbar">
+            <button class="back-btn" onclick="leaveChatRoomView()">
+                <span style="font-size:24px; margin-right:2px; line-height:1;">‹</span> Назад
             </button>
-            <div style="text-align:center; flex:1; padding-right:40px;">
-                <div style="font-weight:700; font-size:16px;" id="chat-target-name">...</div>
-                <div style="font-size:11px; color:var(--text-sub);" id="chat-target-role">...</div>
+            <div class="chat-navbar-center">
+                <div class="chat-navbar-name" id="node-chat-partner-name">...</div>
+                <div class="chat-navbar-status" id="node-chat-partner-status">в сети</div>
             </div>
-            <button class="send-btn" style="background:transparent; font-size:20px;" onclick="startFacetimeCallSession()" title="FaceTime Звонок">📹</button>
+            <!-- КНОПКА ВИДЕОЗВОНКА -->
+            <button class="action-icon-btn" onclick="startVideoCallPipeline()" title="Видеозвонок">📹</button>
         </header>
         
-        <div class="chat-messages" id="chat-messages-container"></div>
+        <div class="chat-history" id="chat-scroller-node"></div>
         
-        <footer class="ios-input-bar">
-            <input type="text" id="message-input-field" placeholder="Cообщение iMessage" onkeypress="if(event.key==='Enter') sendChatMessagePacket()">
-            <button class="send-btn" onclick="sendChatMessagePacket()">➔</button>
+        <footer class="tg-input-panel">
+            <input type="text" id="chat-text-input" placeholder="Сообщение" onkeypress="if(event.key==='Enter') transmitMessagePacket()">
+            <button class="action-icon-btn" onclick="transmitMessagePacket()">➔</button>
         </footer>
     </div>
 
+    <!-- FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -314,193 +297,191 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let currentUserId = localStorage.getItem('liquid_uid') || null;
+        let currentUserId = localStorage.getItem('tg_uid') || null;
         let allUsers = [];
-        let activeTabId = 'chats';
-        let activeChatPartnerId = null;
+        let currentActiveTab = 'chats';
+        let currentChatPartnerId = null;
 
-        // WebRTC Сигнальные переменные
+        // WebRTC Signaling State
         let localStream = null;
         let peerConnection = null;
-        let callReference = null;
-        const stunConfiguration = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] };
+        let activeCallRef = null;
+        const iceServersConfig = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }] };
 
         window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('liquid_theme') || 'light';
-            toggleThemeMode(savedTheme);
-            document.getElementById('theme-selector').value = savedTheme;
+            const mode = localStorage.getItem('tg_dark') === 'true';
+            switchTheme(mode);
+            document.getElementById('dark-theme-toggle').checked = mode;
 
             database.ref('users').on('value', (snap) => {
-                const data = snap.val() || {};
-                allUsers = Object.values(data);
-                renderApplicationInterface();
-                listenIncomingFacetimeCalls();
+                allUsers = Object.values(snap.val() || {});
+                renderDynamicInterface();
+                listenIncomingCalls();
             });
 
-            if(currentUserId) {
-                document.getElementById('auth-layer').style.opacity = '0';
-                setTimeout(() => document.getElementById('auth-layer').style.display = 'none', 300);
+            if (currentUserId) {
+                document.getElementById('auth-layer').style.display = 'none';
             }
         });
 
-        function performInstantAuth() {
-            const login = document.getElementById('auth-username').value.trim().toLowerCase();
-            const name = document.getElementById('auth-displayname').value.trim();
-            if(!login || !name) return;
+        function handleInstantLogin() {
+            const login = document.getElementById('inp-login').value.trim().toLowerCase();
+            const name = document.getElementById('inp-name').value.trim();
+            if (!login || !name) return;
 
-            const existing = allUsers.find(u => u.login === login);
-            if(existing) {
-                currentUserId = existing.id;
+            const userMatch = allUsers.find(u => u.login === login);
+            if (userMatch) {
+                currentUserId = userMatch.id;
             } else {
-                currentUserId = "uid_" + Date.now();
-                const colors = ["#ff2d55", "#007af5", "#34c759", "#ff9500", "#af52de"];
+                currentUserId = "id_" + Date.now();
+                const colors = ["#248bfe", "#34c759", "#ff9500", "#ff2d55", "#af52de"];
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 database.ref('users/' + currentUserId).set({
-                    id: currentUserId, login, name, color, role: "Сотрудник Коллаж"
+                    id: currentUserId, login, name, color, role: "Пользователь сети"
                 });
             }
-            localStorage.setItem('liquid_uid', currentUserId);
-            document.getElementById('auth-layer').style.opacity = '0';
-            setTimeout(() => document.getElementById('auth-layer').style.display = 'none', 300);
-            renderApplicationInterface();
+            localStorage.setItem('tg_uid', currentUserId);
+            document.getElementById('auth-layer').style.display = 'none';
+            renderDynamicInterface();
         }
 
-        function clearSessionLogOut() {
-            localStorage.removeItem('liquid_uid');
+        function logOutSession() {
+            localStorage.removeItem('tg_uid');
             location.reload();
         }
 
-        function switchIosTab(tabName) {
-            activeTabId = tabName;
-            document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+        function navigateToTab(tabName) {
+            currentActiveTab = tabName;
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view-layer').forEach(v => v.classList.remove('active'));
             
-            document.getElementById('dock-' + tabName).classList.add('active');
-            document.getElementById('view-' + tabName).classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            document.getElementById('layer-' + tabName).classList.add('active');
 
-            const titles = { chats: "Чаты", contacts: "Контакты", settings: "Настройки" };
-            document.getElementById('ios-page-title').innerText = titles[tabName];
-            renderApplicationInterface();
+            const headers = { chats: "Чаты", contacts: "Контакты", settings: "Настройки" };
+            document.getElementById('tg-title-node').innerText = headers[tabName];
+            renderDynamicInterface();
         }
 
-        function renderApplicationInterface() {
-            if(!currentUserId) return;
+        function renderDynamicInterface() {
+            if (!currentUserId) return;
             const me = allUsers.find(u => u.id === currentUserId);
-            if(me) {
-                document.getElementById('my-badge-container').innerHTML = `<div class="ios-avatar" style="background:${me.color}; margin:0; width:34px; height:34px; font-size:12px;">${me.name.substring(0,2).toUpperCase()}</div>`;
+            if (me) {
+                document.getElementById('tg-self-avatar').innerHTML = `<div class="tg-avatar" style="background:${me.color}; width:32px; height:32px; font-size:12px; margin:0;">${me.name.substring(0,2).toUpperCase()}</div>`;
             }
-
-            if(activeTabId === 'contacts') renderContactsTab();
-            if(activeTabId === 'chats') renderChatsTab();
+            if (currentActiveTab === 'contacts') drawContactsView();
+            if (currentActiveTab === 'chats') drawChatsView();
         }
 
-        function renderContactsTab() {
-            const container = document.getElementById('view-contacts');
-            container.innerHTML = '';
+        function drawContactsView() {
+            const root = document.getElementById('layer-contacts');
+            root.innerHTML = '';
             allUsers.filter(u => u.id !== currentUserId).forEach(u => {
                 const cell = document.createElement('div');
-                cell.className = 'ios-cell';
-                cell.onclick = () => openIosChatOverlayWith(u.id);
+                cell.className = 'tg-cell';
+                cell.onclick = () => initChatRoomOverlay(u.id);
                 cell.innerHTML = `
-                    <div class="ios-avatar" style="background:${u.color}">${u.name.substring(0,2).toUpperCase()}</div>
-                    <div class="cell-body">
-                        <div class="cell-row"><span class="cell-name">${u.name}</span></div>
-                        <div class="cell-text">${u.role}</div>
+                    <div class="tg-avatar" style="background:${u.color}">${u.name.substring(0,2).toUpperCase()}</div>
+                    <div class="tg-cell-info">
+                        <div class="tg-cell-top"><span class="tg-cell-name">${u.name}</span></div>
+                        <div class="tg-cell-msg">${u.role || 'В сети'}</div>
                     </div>
                 `;
-                container.appendChild(cell);
+                root.appendChild(cell);
             });
         }
 
-        function renderChatsTab() {
-            const container = document.getElementById('view-chats');
-            container.innerHTML = '';
+        function drawChatsView() {
+            const root = document.getElementById('layer-chats');
+            root.innerHTML = '';
             
-            database.ref('messages').once('value', (snapshot) => {
-                const msgs = snapshot.val() || {};
-                let hasChats = false;
+            database.ref('messages').once('value', (snap) => {
+                const msgs = snap.val() || {};
+                let count = 0;
 
                 allUsers.filter(u => u.id !== currentUserId).forEach(u => {
-                    const chatKey = [currentUserId, u.id].sort().join('__');
-                    if(!msgs[chatKey]) return;
-                    hasChats = true;
+                    const roomKey = [currentUserId, u.id].sort().join('__');
+                    if (!msgs[roomKey]) return;
+                    count++;
 
-                    const list = Object.values(msgs[chatKey]);
-                    const lastMsg = list[list.length - 1];
+                    const packetList = Object.values(msgs[roomKey]);
+                    const lastPacket = packetList[packetList.length - 1];
 
                     const cell = document.createElement('div');
-                    cell.className = 'ios-cell';
-                    cell.onclick = () => openIosChatOverlayWith(u.id);
+                    cell.className = 'tg-cell';
+                    cell.onclick = () => initChatRoomOverlay(u.id);
                     cell.innerHTML = `
-                        <div class="ios-avatar" style="background:${u.color}">${u.name.substring(0,2).toUpperCase()}</div>
-                        <div class="cell-body">
-                            <div class="cell-row">
-                                <span class="cell-name">${u.name}</span>
-                                <span class="cell-time">${lastMsg.time || ''}</span>
+                        <div class="tg-avatar" style="background:${u.color}">${u.name.substring(0,2).toUpperCase()}</div>
+                        <div class="tg-cell-info">
+                            <div class="tg-cell-top">
+                                <span class="tg-cell-name">${u.name}</span>
+                                <span class="tg-cell-time">${lastPacket.time || ''}</span>
                             </div>
-                            <div class="cell-text">${lastMsg.text || ''}</div>
+                            <div class="tg-cell-msg">${lastPacket.text || ''}</div>
                         </div>
                     `;
-                    container.appendChild(cell);
+                    root.appendChild(cell);
                 });
 
-                if(!hasChats) {
-                    container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-sub); font-size:14px;">Нет активных диалогов.<br>Перейдите во вкладку Контакты.</div>`;
+                if (count === 0) {
+                    root.innerHTML = `<div style="text-align:center; padding:50px 20px; color:var(--tg-subtext); font-size:14px;">Список чатов пуст.<br>Откройте вкладку "Контакты" для начала общения.</div>`;
                 }
             });
         }
 
-        let currentMessagesListener = null;
+        let messagesReference = null;
 
-        function openIosChatOverlayWith(partnerId) {
-            activeChatPartnerId = partnerId;
-            const targetUser = allUsers.find(u => u.id === partnerId);
-            if(!targetUser) return;
+        function initChatRoomOverlay(partnerId) {
+            currentChatPartnerId = partnerId;
+            const target = allUsers.find(u => u.id === partnerId);
+            if (!target) return;
 
-            document.getElementById('chat-target-name').innerText = targetUser.name;
-            document.getElementById('chat-target-role').innerText = targetUser.role;
-            document.getElementById('ios-chat-overlay').classList.add('active');
+            document.getElementById('node-chat-partner-name').innerText = target.name;
+            document.getElementById('node-chat-partner-status').innerText = target.role || 'в сети';
+            document.getElementById('tg-chat-view').classList.add('active');
 
-            const chatKey = [currentUserId, partnerId].sort().join('__');
-            if(currentMessagesListener) currentMessagesListener.off();
+            const roomKey = [currentUserId, partnerId].sort().join('__');
+            if (messagesReference) messagesReference.off();
 
-            currentMessagesListener = database.ref('messages/' + chatKey);
-            currentMessagesListener.on('value', (snap) => {
+            messagesReference = database.ref('messages/' + roomKey);
+            messagesReference.on('value', (snap) => {
                 const data = snap.val() || {};
                 const list = Object.keys(data).map(k => data[k]);
                 
-                const msgContainer = document.getElementById('chat-messages-container');
-                msgContainer.innerHTML = '';
+                const scroller = document.getElementById('chat-scroller-node');
+                scroller.innerHTML = '';
                 
                 list.forEach(m => {
                     const isMe = m.senderId === currentUserId;
-                    const wrapper = document.createElement('div');
-                    wrapper.className = `bubble-wrapper ${isMe ? 'out' : 'in'}`;
-                    wrapper.innerHTML = `
-                        <div class="bubble-content">${m.text}</div>
-                        <div class="bubble-time">${m.time}</div>
+                    const line = document.createElement('div');
+                    line.className = `msg-line ${isMe ? 'out' : 'in'}`;
+                    line.innerHTML = `
+                        <div class="msg-box">
+                            <span>${m.text}</span>
+                            <span class="msg-meta">${m.time}</span>
+                        </div>
                     `;
-                    msgContainer.appendChild(wrapper);
+                    scroller.appendChild(line);
                 });
-                msgContainer.scrollTop = msgContainer.scrollHeight;
+                scroller.scrollTop = scroller.scrollHeight;
             });
         }
 
-        function closeIosChatOverlay() {
-            document.getElementById('ios-chat-overlay').classList.remove('active');
-            activeChatPartnerId = null;
-            renderChatsTab();
+        function leaveChatRoomView() {
+            document.getElementById('tg-chat-view').classList.remove('active');
+            currentChatPartnerId = null;
+            drawChatsView();
         }
 
-        function sendChatMessagePacket() {
-            const input = document.getElementById('message-input-field');
+        function transmitMessagePacket() {
+            const input = document.getElementById('chat-text-input');
             const text = input.value.trim();
-            if(!text || !activeChatPartnerId) return;
+            if (!text || !currentChatPartnerId) return;
 
-            const chatKey = [currentUserId, activeChatPartnerId].sort().join('__');
+            const roomKey = [currentUserId, currentChatPartnerId].sort().join('__');
             const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-            database.ref('messages/' + chatKey).push({
+            database.ref('messages/' + roomKey).push({
                 senderId: currentUserId,
                 text: text,
                 time: time
@@ -508,31 +489,31 @@
             input.value = '';
         }
 
-        function toggleThemeMode(mode) {
-            localStorage.setItem('liquid_theme', mode);
-            document.documentElement.setAttribute('data-theme', mode);
+        function switchTheme(isDark) {
+            localStorage.setItem('tg_dark', isDark);
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
         }
 
         // =========================================================================
-        // 📞 КОРПОРАТИВНЫЙ МОДУЛЬ ЗВОНКОВ FACETIME (WebRTC Signaling Engine)
+        // 📞 СИГНАЛЬНОЕ ЯДРО ВЕБ-ЗВОНКОВ (WebRTC Engine)
         // =========================================================================
 
-        function listenIncomingFacetimeCalls() {
-            if(!currentUserId) return;
+        function listenIncomingCalls() {
+            if (!currentUserId) return;
             database.ref('facetime').on('value', async (snapshot) => {
                 const data = snapshot.val() || {};
-                for (let callId in data) {
-                    const session = data[callId];
-                    if(session.calleeId === currentUserId && session.status === 'ringing') {
-                        callReference = database.ref('facetime/' + callId);
+                for (let key in data) {
+                    const session = data[key];
+                    if (session.calleeId === currentUserId && session.status === 'ringing') {
+                        activeCallRef = database.ref('facetime/' + key);
                         const caller = allUsers.find(u => u.id === session.callerId);
                         
-                        document.getElementById('ft-caller-name').innerText = caller ? caller.name : "Абонент";
-                        document.getElementById('ft-banner').classList.add('active');
+                        document.getElementById('lbl-caller-name').innerText = caller ? caller.name : "Вызов";
+                        document.getElementById('call-alert-banner').classList.add('active');
 
-                        callReference.on('value', (innerSnap) => {
-                            if(!innerSnap.exists() || innerSnap.val().status === 'ended') {
-                                cleanupFacetimeDom();
+                        activeCallRef.on('value', (innerSnap) => {
+                            if (!innerSnap.exists() || innerSnap.val().status === 'ended') {
+                                wipeCallDOMState();
                             }
                         });
                         break;
@@ -541,116 +522,116 @@
             });
         }
 
-        async function startFacetimeCallSession() {
-            if(!activeChatPartnerId) return;
-            const callId = [currentUserId, activeChatPartnerId].sort().join('__');
-            callReference = database.ref('facetime/' + callId);
+        async function startVideoCallPipeline() {
+            if (!currentChatPartnerId) return;
+            const callId = [currentUserId, currentChatPartnerId].sort().join('__');
+            activeCallRef = database.ref('facetime/' + callId);
 
-            document.getElementById('facetime-layer').classList.add('active');
+            document.getElementById('call-screen').classList.add('active');
 
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            document.getElementById('local-video').srcObject = localStream;
+            document.getElementById('video-local-track').srcObject = localStream;
 
-            peerConnection = new RTCPeerConnection(stunConfiguration);
+            peerConnection = new RTCPeerConnection(iceServersConfig);
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
             peerConnection.ontrack = (e) => {
-                document.getElementById('remote-video').srcObject = e.streams[0];
+                document.getElementById('video-remote-track').srcObject = e.streams[0];
             };
 
             peerConnection.onicecandidate = (e) => {
-                if(e.candidate) callReference.child('callerCandidates').push(e.candidate.toJSON());
+                if (e.candidate) activeCallRef.child('callerCandidates').push(e.candidate.toJSON());
             };
 
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
 
-            await callReference.set({
+            await activeCallRef.set({
                 id: callId,
                 callerId: currentUserId,
-                calleeId: activeChatPartnerId,
+                calleeId: currentChatPartnerId,
                 status: 'ringing',
                 offer: { type: offer.type, sdp: offer.sdp }
             });
 
-            callReference.child('answer').on('value', async (snap) => {
+            activeCallRef.child('answer').on('value', async (snap) => {
                 const ans = snap.val();
-                if(ans && peerConnection.signalingState !== "stable") {
+                if (ans && peerConnection.signalingState !== "stable") {
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(ans));
                 }
             });
 
-            callReference.child('calleeCandidates').on('child_added', (snap) => {
-                if(snap.val() && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));
+            activeCallRef.child('calleeCandidates').on('child_added', (snap) => {
+                if (snap.val() && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(snap.val()));
             });
         }
 
-        async function acceptFacetimeCall() {
-            document.getElementById('ft-banner').classList.remove('active');
-            document.getElementById('facetime-layer').classList.add('active');
+        async function acceptIncomingCall() {
+            document.getElementById('call-alert-banner').classList.remove('active');
+            document.getElementById('call-screen').classList.add('active');
 
-            const snap = await callReference.get();
+            const snap = await activeCallRef.get();
             const sessionData = snap.val();
 
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            document.getElementById('local-video').srcObject = localStream;
+            document.getElementById('video-local-track').srcObject = localStream;
 
-            peerConnection = new RTCPeerConnection(stunConfiguration);
+            peerConnection = new RTCPeerConnection(iceServersConfig);
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
             peerConnection.ontrack = (e) => {
-                document.getElementById('remote-video').srcObject = e.streams[0];
+                document.getElementById('video-remote-track').srcObject = e.streams[0];
             };
 
             peerConnection.onicecandidate = (e) => {
-                if(e.candidate) callReference.child('calleeCandidates').push(e.candidate.toJSON());
+                if (e.candidate) activeCallRef.child('calleeCandidates').push(e.candidate.toJSON());
             };
 
             await peerConnection.setRemoteDescription(new RTCSessionDescription(sessionData.offer));
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
 
-            await callReference.update({
+            await activeCallRef.update({
                 status: 'connected',
                 answer: { type: answer.type, sdp: answer.sdp }
             });
 
-            callReference.child('callerCandidates').on('child_added', (cSnap) => {
-                if(cSnap.val() && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(cSnap.val()));
+            activeCallRef.child('callerCandidates').on('child_added', (cSnap) => {
+                if (cSnap.val() && peerConnection) peerConnection.addIceCandidate(new RTCIceCandidate(cSnap.val()));
             });
         }
 
-        function declineFacetimeCall() {
-            document.getElementById('ft-banner').classList.remove('active');
-            if(callReference) {
-                callReference.update({ status: 'ended' });
-                callReference.remove();
+        function rejectIncomingCall() {
+            document.getElementById('call-alert-banner').classList.remove('active');
+            if (activeCallRef) {
+                activeCallRef.update({ status: 'ended' });
+                activeCallRef.remove();
             }
         }
 
-        function hangupFacetimeCall() {
-            if(callReference) {
-                callReference.update({ status: 'ended' });
-                callReference.remove();
+        function terminateCallSession() {
+            if (activeCallRef) {
+                activeCallRef.update({ status: 'ended' });
+                activeCallRef.remove();
             }
-            cleanupFacetimeDom();
+            wipeCallDOMState();
         }
 
-        function cleanupFacetimeDom() {
-            document.getElementById('facetime-layer').classList.remove('active');
-            document.getElementById('ft-banner').classList.remove('active');
-            if(localStream) {
+        function wipeCallDOMState() {
+            document.getElementById('call-screen').classList.remove('active');
+            document.getElementById('call-alert-banner').classList.remove('active');
+            if (localStream) {
                 localStream.getTracks().forEach(t => t.stop());
                 localStream = null;
             }
-            if(peerConnection) {
+            if (peerConnection) {
                 peerConnection.close();
                 peerConnection = null;
             }
         }
 
-        function muteFacetimeCamera() {
-            if(localStream) {
+        function toggleCameraTrack() {
+            if (localStream) {
                 const track = localStream.getVideoTracks()[0];
                 track.enabled = !track.enabled;
             }
